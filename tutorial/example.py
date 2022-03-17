@@ -13,7 +13,7 @@ def sum_of_squares(a: int, b: int) -> float:
         float: The difference of squares
     """
     # Complete the following line with the difference of squares
-    diff = 0
+    diff = a**2 - b **2
 
     return diff
 
