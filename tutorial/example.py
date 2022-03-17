@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def sum_of_squares(a: int, b: int) -> float:
+def sum_of_squares(a: int, b: int) -> int:
     """This function calculates the difference of squares of two integers.
 
     Args:
@@ -13,7 +13,7 @@ def sum_of_squares(a: int, b: int) -> float:
         float: The difference of squares
     """
     # Complete the following line with the difference of squares
-    diff = 0
+    diff = a**2 - b**2
 
     return diff
 
@@ -22,8 +22,10 @@ a = [2, 3, 4, 5, 6]
 b = [7, 9, 5, 13, 11]
 diffs = []
 # Calculate the differences of squares of the integers in lists a and b and
-#  plot them
+for i in range(len(a)):
+    diffs.append(sum_of_squares(a[i], b[i]))
 
+#  plot them
 plt.figure()
 plt.plot(diffs)
 plt.show()
