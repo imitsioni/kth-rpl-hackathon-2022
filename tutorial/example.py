@@ -18,7 +18,7 @@ def diff_of_squares(a: int, b: int) -> float:
     return float(diff)
 
 
-a = [2, 3, 4, 5, 6, 9999, 8888]
+a = [2, 3, 4, 5, 6, 23, 42]
 b = [7, 9, 5, 13, 11]
 diffs = []
 # Calculate the differences of squares of the integers in lists a and b and
