@@ -15,7 +15,7 @@ def sum_of_squares(a: int, b: int) -> float:
     # Complete the following line with the difference of squares
     diff = a**2 - b**2
 
-    return diff
+    return float(diff)
 
 
 a = [2, 3, 4, 5, 6]
