@@ -4,6 +4,8 @@ import roslib; roslib.load_manifest('smach_tutorials')
 import rospy
 import smach
 import smach_ros
+import time
+
 
 # define state Foo
 class Foo(smach.State):
@@ -17,6 +19,7 @@ class Foo(smach.State):
         rospy.loginfo('Executing state FOO')
         if userdata.foo_counter_in < 3:
             userdata.foo_counter_out = userdata.foo_counter_in + 1
+            time.sleep(10)
             return 'outcome1'
         else:
             return 'outcome2'
@@ -58,9 +61,16 @@ def main():
                                remapping={'bar_counter_in':'sm_counter'})
 
 
+    # Create and start the introspection server
+    sis = smach_ros.IntrospectionServer('server_name', sm, '/SM_ROOT')
+    sis.start()
+
     # Execute SMACH plan
     outcome = sm.execute()
 
+    # Wait for ctrl-c to stop the application
+    rospy.spin()
+    sis.stop()
 
 if __name__ == '__main__':
     main()
