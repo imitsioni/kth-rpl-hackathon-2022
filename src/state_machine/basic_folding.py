@@ -21,7 +21,7 @@ class Start(smach.State):
 
     def execute(self, userdata):
         rospy.loginfo('Executing state Identify Corner')
-        time.sleep(2)
+        time.sleep(1)
         return 'sucess'
 
 
@@ -38,7 +38,7 @@ class IdentifyCorner(smach.State):
 
     def execute(self, userdata):
         rospy.loginfo('Executing state Identify Corner')
-        time.sleep(2)
+        time.sleep(1)
         return 'sucess'
 
 
@@ -53,7 +53,7 @@ class GraspCorner(smach.State):
     def execute(self, userdata):
         rospy.loginfo('Executing state Grasp Corner')
         # rospy.loginfo('Counter = %f' % userdata.bar_counter_in)
-        time.sleep(2)
+        time.sleep(1)
         return 'sucess'
 
 
@@ -67,7 +67,7 @@ class Stretch(smach.State):
 
     def execute(self, userdata):
         rospy.loginfo('Executing state Stretch')
-        time.sleep(2)
+        time.sleep(1)
 
         # rospy.loginfo('Counter = %f' % userdata.bar_counter_in)
 
@@ -83,7 +83,7 @@ class Fold(smach.State):
 
     def execute(self, userdata):
         rospy.loginfo('Executing state Fold')
-        time.sleep(2)
+        time.sleep(1)
 
         # rospy.loginfo('Counter = %f' % userdata.bar_counter_in)
         return 'sucess'
@@ -139,7 +139,7 @@ def main():
     rospy.init_node('folding_state_machine')
 
     # Create a SMACH state machine
-    sm_top = smach.StateMachine(outcomes=['Start'])
+    sm_top = smach.StateMachine(outcomes=['final_outcome'])
     sm_top.userdata.sm_counter = 0
     sm_top.userdata.corner_id = 0
     # sm.userdata.corner_positon
@@ -164,7 +164,7 @@ def main():
 
         smach.StateMachine.add('FinalGoal',
                                sm_sub,
-                               transitions={'folded': 'Start'})
+                               transitions={'folded': 'final_outcome'})
 
     # Create and start the introspection server
     sis = smach_ros.IntrospectionServer('server_name', sm_top, '/SM_ROOT')

@@ -6,14 +6,14 @@ import smach
 import smach_ros
 import time
 
-## Planning imports 
+## Planning imports
 from wrapping import BaxterWrapping
 import moveit_commander
 import time
 from geometry_msgs.msg import Vector3
 import rospy
-## Planning imports 
 
+## Planning imports
 
 
 # Defines start node to get all info
@@ -70,7 +70,7 @@ class GraspCorner(smach.State):
 
         # Grasp corner
         corner = userdata.corner_id
-        baxter.grasp(corner)       # int
+        baxter.grasp(corner)  # int
         time.sleep(5)
 
         # Close
@@ -112,8 +112,8 @@ class Fold(smach.State):
         # Place
         corner = userdata.corner_id
         edge = userdata.edge
-        baxter.place(closest_corners[corner], final_corners[corner], edge)    # Vector3, Vector3, float
-
+        baxter.place(closest_corners[corner], final_corners[corner],
+                     edge)  # Vector3, Vector3, float
 
         # rospy.loginfo('Counter = %f' % userdata.bar_counter_in)
         return 'sucess'
@@ -128,7 +128,7 @@ class Goal(smach.State):
 
     def execute(self, userdata):
         rospy.loginfo('Executing state GOAL')
-            # Open gripper
+        # Open gripper
         baxter.open_gripper()
         # rospy.loginfo('Counter = %f' % userdata.bar_counter_in)
         return 'sucess'
@@ -207,10 +207,8 @@ def main():
     final_corners = [C, D, A, B]
     edge = 0.08
 
-
-
     # Create a SMACH state machine
-    sm_top = smach.StateMachine(outcomes=['Start'])
+    sm_top = smach.StateMachine(outcomes=['final_outcome'])
     sm_top.userdata.sm_counter = 0
     sm_top.userdata.corner_id = 0
     # sm.userdata.corner_positon
@@ -241,7 +239,7 @@ def main():
 
         smach.StateMachine.add('FinalGoal',
                                sm_sub,
-                               transitions={'folded': 'Start'})
+                               transitions={'folded': 'final_outcome'})
 
     # Create and start the introspection server
     sis = smach_ros.IntrospectionServer('server_name', sm_top, '/SM_ROOT')
