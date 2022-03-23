@@ -102,7 +102,7 @@ class Goal(smach.State):
         return 'sucess'
 
 
-def sub_state_machine_fold_corner(counter=0, final_flag=True):
+def sub_state_machine_fold_corner(counter=0, final_flag=False):
     smach.StateMachine.add(
         'IdentifyCorner_' + str(counter),
         IdentifyCorner(),
@@ -146,7 +146,7 @@ def main():
 
     # Open the container
     counter_fold = 0
-    max_goal_counter = 0
+    max_goal_counter = 3
     with sm_top:
         # Add states to the container
 
@@ -157,7 +157,10 @@ def main():
         sm_sub = smach.StateMachine(outcomes=['folded'])
 
         with sm_sub:
-            sub_state_machine_fold_corner(counter=counter_fold)
+            sub_state_machine_fold_corner(0)
+            sub_state_machine_fold_corner(1)
+            sub_state_machine_fold_corner(2)
+            sub_state_machine_fold_corner(counter=3, final_flag=True)
 
         smach.StateMachine.add('FinalGoal',
                                sm_sub,
