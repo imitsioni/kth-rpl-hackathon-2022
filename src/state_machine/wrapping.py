@@ -473,7 +473,7 @@ class BaxterWrapping:
         # Get EE position
         EE_pose = group.get_current_pose()
         # plan movements
-        directions, distances = self.get_waypoints(A, B, C, D, EE_pose, l_edge)
+        directions, distances = self.get_waypoints(A, B, EE_pose, l_edge)
 
         # move towards the closest corner
         self.move_along_line(directions[0], distances[0])
