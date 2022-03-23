@@ -1,0 +1,69 @@
+<launch>
+  
+
+  <!-- Start joint action server -->
+  <node pkg="baxter_interface" name="joint_trajectory_action_server.py" type="joint_trajectory_action_server.py" output="screen"/>
+
+  <param name="move_group/trajectory_execution/allowed_execution_duration_scaling" value="4.0" />
+  <param name="move_group/trajectory_execution/execution_duration_monitoring" value="false" />
+
+  <!-- Start baxter -->
+  <include file="$(find baxter_moveit_config)/launch/baxter_grippers.launch">
+    <arg name="rviz_config" value="$(find kth-rpl-hackathon-2022)/launch/wrapping.rviz" />
+  </include>
+
+  <!-- Start the camera -->
+  <!--include file="$(find openni2_launch)/launch/openni2.launch"/>-->
+
+  <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+     <arg name="filters" value="pointcloud,spatial,temporal" />
+     <arg name="align_depth" value="true" />
+  </include>
+
+  <!--include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
+  </include>-->
+
+  <!-- Start marker detection -->
+  <include file="$(find apriltag_ros)/launch/continuous_detection_hackathon.launch"/>
+
+
+  <!-- Set static tramnsformation-->
+  
+
+    <!-- <node pkg="tf"
+        type="static_transform_publisher"
+        name="world_camera_tf"
+        args="1.133 -0.041 0.691 -0.537 0.006 0.844 0.005   world camera_link 10" /> -->
+
+    <!-- <node pkg="tf"
+        type="static_transform_publisher"
+        name="world_camera_tf"
+        args="1.133 -0.021 0.671 -0.546 -0.006 0.838 -0.005  world camera_link 10" /> -->
+
+    <node pkg="tf"
+        type="static_transform_publisher"
+        name="world_camera_tf"
+        args="0.139 0.088 0.537 -0.602 0.690 -0.274 0.294 world camera_link 10" />
+
+
+    
+
+    <!-- Node for birdseye camera -->
+    <!--node pkg="tf"
+        type="static_transform_publisher"
+        name="birdseye_camera"
+        args="0.622 0.041 0.7 1.0 -0.0 0.0 0.0   world birdseye_camera 10" /-->
+
+     <!-- Node for optoforce sensor -->
+     <node pkg="optoforce_ros_fingertip"
+        type="optoforce_publisher"
+        name="optoforce_publisher" />
+
+     <node pkg="optoforce_ros_fingertip"
+        type="optoforce_publisher"
+        name="optoforce_publisher2" />
+
+
+
+
+</launch>
