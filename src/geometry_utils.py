@@ -9,6 +9,16 @@ from sensor_msgs.msg import PointCloud2, PointField
 import sensor_msgs.point_cloud2 as pc2
 from ctypes import *
 
+def custom_draw_geometry_with_key_callback(pcd):
+
+    def change_background_to_black(vis):
+        opt = vis.get_render_option()
+        opt.background_color = np.asarray([0, 0, 0])
+        return False
+    key_to_callback = {}
+    key_to_callback[ord("K")] = change_background_to_black
+    o3d.visualization.draw_geometries_with_key_callbacks(pcd, key_to_callback)
+
 def read_pointcloud(path: str, view: bool = False) -> o3d.geometry.PointCloud:
     '''
     # read point cloud from .pcd or .ply file
@@ -20,7 +30,7 @@ def read_pointcloud(path: str, view: bool = False) -> o3d.geometry.PointCloud:
     '''
     pcd = o3d.io.read_point_cloud(path)
     if view:
-        o3d.visualization.draw_geometries([pcd])
+        custom_draw_geometry_with_key_callback([pcd])
     return pcd
 
 def init_pointcloud(points: np.array, colors: np.array = None, view: bool = False) -> o3d.geometry.PointCloud:
@@ -36,7 +46,7 @@ def init_pointcloud(points: np.array, colors: np.array = None, view: bool = Fals
     if colors is not None:
         pcd.colors = o3d.utility.Vector3dVector(colors)
     if view:
-        o3d.visualization.draw_geometries([pcd])
+        custom_draw_geometry_with_key_callback([pcd])
     return pcd
 
 def downsample(pcd: o3d.geometry.PointCloud, size: float = 0.01, view: bool = False) -> o3d.geometry.PointCloud:
@@ -49,7 +59,7 @@ def downsample(pcd: o3d.geometry.PointCloud, size: float = 0.01, view: bool = Fa
     '''
     downpcd = pcd.voxel_down_sample(voxel_size=size)
     if view:
-        o3d.visualization.draw_geometries([downpcd])
+        custom_draw_geometry_with_key_callback([downpcd])
     return downpcd
 
 
@@ -71,7 +81,7 @@ def cluster(pcd: o3d.geometry.PointCloud, eps: float = 0.02, min_points: int = 1
         newdownpcd = o3d.geometry.PointCloud()
         newdownpcd.points = o3d.utility.Vector3dVector(np.asarray(pcd.points))
         newdownpcd.colors = o3d.utility.Vector3dVector(colors[:, :3])
-        o3d.visualization.draw_geometries([newdownpcd])
+        custom_draw_geometry_with_key_callback([newdownpcd])
     return labels
 
 
@@ -88,7 +98,7 @@ def get_largest_cluster(pcd: o3d.geometry.PointCloud, labels: np.array, view: bo
     wanted_index = np.where(labels == max_labels)[0]
     wanted_pcd = pcd.select_down_sample(wanted_index)
     if view:
-        o3d.visualization.draw_geometries([wanted_pcd])
+        custom_draw_geometry_with_key_callback([wanted_pcd])
     return wanted_pcd
 
 
@@ -126,7 +136,7 @@ def find_plane(pcd: o3d.geometry.PointCloud, max_plane_idx: int = 2, distance_th
         for i in range(max_plane_idx):
             colors_seg = plt.get_cmap('tab20')(i)
             segments[i].paint_uniform_color(list(colors_seg[:3]))
-        o3d.visualization.draw_geometries([segments[i] for i in range(max_plane_idx)] + [rest])
+        custom_draw_geometry_with_key_callback([segments[i] for i in range(max_plane_idx)] + [rest])
     return segments, segment_models
 
 
@@ -145,9 +155,9 @@ def get_plane_distance(select_bbox: o3d.geometry.OrientedBoundingBox, plane: np.
     return distance
 
 
-def get_width_length(selected_bbox: o3d.geometry.OrientedBoundingBox) -> [float, float]:
+def get_surface_size(selected_bbox: o3d.geometry.OrientedBoundingBox) -> [float, float]:
     """
-    find the width and length of the bbox
+    find the size of the bbox
     :param selected_bbox: input bbox
     :return: float, float
     """
@@ -158,18 +168,18 @@ def get_width_length(selected_bbox: o3d.geometry.OrientedBoundingBox) -> [float,
     max_bound = aa_obb.get_max_bound()
     min_bound = aa_obb.get_min_bound()
     size = max_bound - min_bound
-    width = size[0]
-    length = size[1]
-    return width, length
+    x_length = size[0]
+    y_length = size[1]
+    return x_length, y_length
 
 
-def get_width_length_height(pcd, max_plane_idx=2, view=False) -> [np.array, np.array]:
+def get_width_length_height(pcd, max_plane_idx=2, view=False) -> [np.array, np.array, np.array]:
     """
     given the pointcloud, find the box and return the geometry of the box and the top center of the box plane
     :param pcd: input pointcloud
     :param max_plane_idx: maximun number of plane want to find
     :param view: Add visualization
-    :return: [width, length, height]: np.array, center: np.array
+    :return: [x_length, y_length, height]: np.array, center: np.array
     """
     downpcd = downsample(pcd=pcd)
     labels = cluster(pcd=downpcd)
@@ -184,12 +194,25 @@ def get_width_length_height(pcd, max_plane_idx=2, view=False) -> [np.array, np.a
     ## obtain geometry information from box points
     box_bbox = box_points.get_oriented_bounding_box()
     center = box_points.get_center()
-    width, length = get_width_length(selected_bbox=box_bbox)
+    x_length, y_length = get_surface_size(selected_bbox=box_bbox)
     height = get_plane_distance(select_bbox=box_bbox, plane=table_plane)
+    
+    # calculate top surface 4 corners
+    original_rotation = box_bbox.R
+    lu = np.array([-x_length/2, y_length/2, 0])  # left up
+    ld = np.array([-x_length/2, -y_length/2,0])  # left down
+    ru =np.array([x_length/2, y_length/2,0])     # right up
+    rd = np.array([x_length/2, -y_length/2,0])   # right down
+    luu = np.matmul(original_rotation, lu) + center
+    ldd = np.matmul(original_rotation, ld) + center
+    ruu = np.matmul(original_rotation, ru) + center
+    rdd = np.matmul(original_rotation, rd) + center
+    top_surface_corners = np.array([luu, ldd, ruu, rdd])
+
     if view:
         test_pcd = o3d.geometry.PointCloud()
-        test_pcd.points = o3d.utility.Vector3dVector(np.asarray(box_bbox.get_box_points()))
-        colorpoint = np.zeros_like(np.asarray(box_bbox.get_box_points()))
+        test_pcd.points = o3d.utility.Vector3dVector(top_surface_corners)
+        colorpoint = np.zeros_like(top_surface_corners)
         colorpoint[:] = np.array([1, 0, 0])
         test_pcd.colors = o3d.utility.Vector3dVector(colorpoint)
 
@@ -198,8 +221,9 @@ def get_width_length_height(pcd, max_plane_idx=2, view=False) -> [np.array, np.a
         color2point = np.zeros_like(box_bbox.get_center().reshape(1, -1))
         color2point[:] = np.array([0, 1, 0])
         test2_pcd.colors = o3d.utility.Vector3dVector(color2point)
-        o3d.visualization.draw_geometries([box_points] + [test_pcd] + [test2_pcd])
-    return np.array([width, length, height]), center
+        custom_draw_geometry_with_key_callback([segments[i] for i in range(max_plane_idx)] + [test_pcd] + [test2_pcd])
+    
+    return np.array([x_length, y_length, height]), center, top_surface_corners
 
 
 ### below refer to https://github.com/kaku756/icp_calib/blob/b6f9af98019990f6111836dcbad4e97e5b69f692/scripts/lib_cloud_conversion_between_Open3D_and_ROS.py
@@ -250,8 +274,9 @@ def convertCloudFromOpen3dToRos(open3d_cloud: o3d.geometry.OrientedBoundingBox, 
 def convertCloudFromRosToOpen3d(ros_cloud: PointCloud2) -> o3d.geometry.PointCloud:
     # Get cloud data from ros_cloud
     field_names=[field.name for field in ros_cloud.fields]
-    cloud_data = list(pc2.read_points(ros_cloud, skip_nans=True, field_names = field_names))
-
+    cloud_data = list(pc2.read_points(ros_cloud, skip_nans=False, field_names = None))
+    cloud_data = np.array(cloud_data)
+    cloud_data = cloud_data[~np.isnan(cloud_data[:,:3]).any(axis=1)]
     # Check empty
     open3d_cloud = o3d.geometry.PointCloud()
     if len(cloud_data)==0:
@@ -263,21 +288,22 @@ def convertCloudFromRosToOpen3d(ros_cloud: PointCloud2) -> o3d.geometry.PointClo
         IDX_RGB_IN_FIELD=3 # x, y, z, rgb
         
         # Get xyz
-        xyz = [(x,y,z) for x,y,z,rgb in cloud_data ] # (why cannot put this line below rgb?)
+        # xyz = [(x,y,z) for x,y,z,rgb in cloud_data ] # (why cannot put this line below rgb?)
+        xyz = cloud_data[:,:3]
 
         # Get rgb
         # Check whether int or float
-        if type(cloud_data[0][IDX_RGB_IN_FIELD])==float: # if float (from pcl::toROSMsg)
-            rgb = [convert_rgbFloat_to_tuple(rgb) for x,y,z,rgb in cloud_data ]
+        if type(cloud_data[0][IDX_RGB_IN_FIELD])==np.float64: # if float (from pcl::toROSMsg)
+            rgb = np.array([convert_rgbFloat_to_tuple(rgb) for x,y,z,rgb in cloud_data ])
         else:
-            rgb = [convert_rgbUint32_to_tuple(rgb) for x,y,z,rgb in cloud_data ]
+            rgb = np.array([convert_rgbUint32_to_tuple(rgb) for x,y,z,rgb in cloud_data ])
 
         # combine
-        open3d_cloud.points = o3d.utility.Vector3dVector(np.array(xyz))
-        open3d_cloud.colors = o3d.utility.Vector3dVector(np.array(rgb)/255.0)
+        open3d_cloud.points = o3d.utility.Vector3dVector(xyz)
+        open3d_cloud.colors = o3d.utility.Vector3dVector(rgb/255.0)
     else:
-        xyz = [(x,y,z) for x,y,z in cloud_data ] # get xyz
-        open3d_cloud.points = o3d.utility.Vector3dVector(np.array(xyz))
+        xyz = cloud_data[:,:3] # get xyz
+        open3d_cloud.points = o3d.utility.Vector3dVector(xyz)
 
     # return
     return open3d_cloud
