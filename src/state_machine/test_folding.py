@@ -184,18 +184,18 @@ def main():
 
     # Get Box estimations from vision
     A = Vector3()
-    A.x = 0.72
-    A.y = -0.17
+    A.x = 0.825
+    A.y = -0.05
     A.z = -0.14
 
     B = Vector3()
-    B.x = 0.72
-    B.y = -0.17
+    B.x = 0.73
+    B.y = 0.11
     B.z = -0.14
 
     C = Vector3()
-    C.x = 0.72
-    C.y = -0.17
+    C.x = 0.58
+    C.y = 0.
     C.z = -0.14
 
     D = Vector3()
