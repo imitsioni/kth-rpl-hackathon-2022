@@ -680,14 +680,15 @@ class BaxterWrapping:
 
     def rabp_go_base_pose(self):
         print("-- right arm base pose --")
-        self.right_group.set_joint_value_target("right_e0", -0.6354515413815326);
-        self.right_group.set_joint_value_target("right_e1", 1.5707963267946636);
-        self.right_group.set_joint_value_target("right_s0", 0.8183787503368682);
-        self.right_group.set_joint_value_target("right_s1", -0.8605632220037172);
-        self.right_group.set_joint_value_target("right_w0", 0.4789855010172204);
-        self.right_group.set_joint_value_target("right_w1", 1.0089758632316308);
-        self.right_group.set_joint_value_target("right_w2", -0.7405292253516835);
+        self.right_group.set_joint_value_target("right_e0", -0.2661456666981193);
+        self.right_group.set_joint_value_target("right_e1", 1.5274613695369008);
+        self.right_group.set_joint_value_target("right_s0", 0.6807039746241523);
+        self.right_group.set_joint_value_target("right_s1", -0.9345777950191884);
+        self.right_group.set_joint_value_target("right_w0", 0.1902136176977913);
+        self.right_group.set_joint_value_target("right_w1", 0.9901845985800346);
+        self.right_group.set_joint_value_target("right_w2", -0.5648884251388037);
         plan = self.right_group.go(wait=True)
+
 
     def labp_go_base_pose(self):
         print("-- left arm base pose --")
@@ -876,13 +877,14 @@ def main():
 
             elif (r_str == "movepr"):
                 p = PoseStamped()
+
                 p.pose.position.x = 0.65
                 p.pose.position.y = -0.5
                 p.pose.position.z = 0.03
-                p.pose.orientation.x = 0.
-                p.pose.orientation.y = 1.
-                p.pose.orientation.z = 0.
-                p.pose.orientation.w = 0.0
+                # p.pose.orientation.x = 0.
+                # p.pose.orientation.y = 1.
+                # p.pose.orientation.z = 0.
+                # p.pose.orientation.w = 0.0
                 bwrap.move_to_point(p)
             elif (r_str == "movepl"):
                 p = PoseStamped()
