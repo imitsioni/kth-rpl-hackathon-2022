@@ -12,13 +12,17 @@
     <arg name="rviz_config" value="$(find kth-rpl-hackathon-2022)/launch/wrapping.rviz" />
   </include>
 
-  <!-- Start the camera -->
-  <!--include file="$(find openni2_launch)/launch/openni2.launch"/>-->
+<!--    --><!-- Start the camera -->
+<!--    <include file="$(find openni2_launch)/launch/openni2.launch"/> -->
 
-  <include file="$(find realsense2_camera)/launch/rs_camera.launch">
-     <arg name="filters" value="pointcloud,spatial,temporal" />
-     <arg name="align_depth" value="true" />
-  </include>
+
+<!--   <include file="$(find realsense2_camera)/launch/rs_camera.launch"/> -->
+
+
+<!--   <include file="$(find realsense2_camera)/launch/rs_camera.launch"> -->
+<!--      <arg name="filters" value="pointcloud,spatial,temporal" /> -->
+<!--      <arg name="align_depth" value="true" /> -->
+<!--   </include> -->
 
   <!--include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
   </include>-->

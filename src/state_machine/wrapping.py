@@ -183,6 +183,12 @@ class BaxterWrapping:
                                                                      # get the tf at first available time
                                                                      rospy.Duration(10.0))  # wait for 1 second
 
+        self.right_gripper_world_transform = self.tfBuffer.lookup_transform("right_gripper",  # source frame
+                                                                     "world",
+                                                                     rospy.Time(0),
+                                                                     # get the tf at first available time
+                                                                     rospy.Duration(10.0))  # wait for 1 second
+
         ##### SUBSCRIPTIONS
         self.left_ee = rospy.Subscriber('/robot/limb/left/endpoint_state', EndpointState, self.left_ee_callback)
         self.right_ee = rospy.Subscriber('/robot/limb/right/endpoint_state', EndpointState, self.right_ee_callback)
