@@ -70,11 +70,20 @@ class GraspCorner(smach.State):
         self.baxter = baxter
 
     def execute(self, userdata):
+        # Verify that the corner is visible
+        rospy.loginfo('Checking Corner Visibility')
+        corner = self.corner_id
+        visible = self.baxter.check_marker_visibility(corner)
+
+        while not visible:
+            rospy.loginfo('Corner NOT Visible')
+            rospy.sleep(1)
+            visible = self.baxter.check_marker_visibility(corner)
+
+        # Grasp corner
         rospy.loginfo('Executing state Grasp Corner')
         # rospy.loginfo('Counter = %f' % userdata.bar_counter_in)
 
-        # Grasp corner
-        corner = self.corner_id
         self.baxter.grasp(corner)  # int
         time.sleep(5)
 

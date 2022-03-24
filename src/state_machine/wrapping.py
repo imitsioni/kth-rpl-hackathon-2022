@@ -347,6 +347,9 @@ class BaxterWrapping:
                                                      tag.pose.pose.pose.position.z]))
             self.detected_corner[tag_ids.index(tag.id[0])] = True
 
+    def check_marker_visibility(self, id):
+        return self.detected_corner[id]
+
     def transform_to_world(self, pos):
         quat = self.world_camera_transform.transform.rotation
         trans = self.world_camera_transform.transform.translation
