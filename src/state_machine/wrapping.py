@@ -409,7 +409,7 @@ class BaxterWrapping:
         quat = [rot_axis[0] * sin(alpha / 2), rot_axis[1] * sin(alpha / 2), rot_axis[2] * sin(alpha / 2), cos(alpha / 2)]
         R2 = quaternion_matrix(quat)[0:3, 0:3]
 
-        R12 = np.matmul(R1.T, R2)
+        R12 = np.matmul(R1.T, R2.T)
         quat12 = self.rotation_matrix_quaternion(R12)
 
         des_orient = Quaternion()
