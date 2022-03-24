@@ -384,10 +384,14 @@ class BaxterWrapping:
                                        # get the tf at first available time
                                        rospy.Duration(1.0))
         quat = world_gripper_trafo.transform.rotation
-        rotm = quaternion_matrix([quat.x, quat.y, quat.z, quat.w])
-        rotm = rotm[0:3, 0:3]
+        print("Quaternion World to gripper")
+        print([quat.x, quat.y, quat.z, quat.w])
+
+        R1 = quaternion_matrix([quat.x, quat.y, quat.z, quat.w])
+        R1 = R1[0:3, 0:3]
+
         # Gripper z axis in world frame
-        z_G_W = rotm.dot(np.array([0, 0, 1]))
+        z_G_W = R1.dot(np.array([0, 0, 1]))
         z_G_W /= np.linalg.norm(z_G_W)
 
         print("Gripper Z in world frame:")
@@ -400,12 +404,12 @@ class BaxterWrapping:
         print("rot_axis: ")
         print(rot_axis)
         # angle by which we'd like to rotate
-        alpha = 20 * np.pi / 180
+        alpha = -20 * np.pi / 180
 
         quat = [rot_axis[0] * sin(alpha / 2), rot_axis[1] * sin(alpha / 2), rot_axis[2] * sin(alpha / 2), cos(alpha / 2)]
-        R2 = self.quaternion_rotation_matrix(quat)
+        R2 = quaternion_matrix(quat)[0:3, 0:3]
 
-        R12 = np.matmul(rotm, np.linalg.inv(R2))
+        R12 = np.matmul(R1.T, R2)
         quat12 = self.rotation_matrix_quaternion(R12)
 
         des_orient = Quaternion()
@@ -422,46 +426,6 @@ class BaxterWrapping:
         y = (R[0, 2] - R[2, 0]) / (4.0 * w)
         z = (R[1, 0] - R[0, 1]) / (4.0 * w)
         return np.array([x, y, z, w])
-
-    def quaternion_rotation_matrix(self, Q):
-        """
-        Covert a quaternion into a full three-dimensional rotation matrix.
-
-        Input
-        :param Q: A 4 element array representing the quaternion (q0,q1,q2,q3)
-
-        Output
-        :return: A 3x3 element matrix representing the full 3D rotation matrix.
-                 This rotation matrix converts a point in the local reference
-                 frame to a point in the global reference frame.
-        """
-        # Extract the values from Q
-        q0 = Q[0]
-        q1 = Q[1]
-        q2 = Q[2]
-        q3 = Q[3]
-
-        # First row of the rotation matrix
-        r00 = 2 * (q0 * q0 + q1 * q1) - 1
-        r01 = 2 * (q1 * q2 - q0 * q3)
-        r02 = 2 * (q1 * q3 + q0 * q2)
-
-        # Second row of the rotation matrix
-        r10 = 2 * (q1 * q2 + q0 * q3)
-        r11 = 2 * (q0 * q0 + q2 * q2) - 1
-        r12 = 2 * (q2 * q3 - q0 * q1)
-
-        # Third row of the rotation matrix
-        r20 = 2 * (q1 * q3 - q0 * q2)
-        r21 = 2 * (q2 * q3 + q0 * q1)
-        r22 = 2 * (q0 * q0 + q3 * q3) - 1
-
-        # 3x3 rotation matrix
-        rot_matrix = np.array([[r00, r01, r02],
-                               [r10, r11, r12],
-                               [r20, r21, r22]])
-
-        return rot_matrix
 
     #
     # def check_marker_visibility(self, id):
@@ -621,6 +585,17 @@ class BaxterWrapping:
 
         # move towards the final point
         self.move_along_line(directions[1], distances[1])
+
+        # Get EE position
+        # EE_pose = group.get_current_pose()
+        # EE_pose.pose.orientation = self.calculate_release_orientation(directions[0])
+        # group.set_pose_target(EE_pose.pose)
+        # group.go(wait=True)
+        # group.clear_pose_targets()
+        # time.sleep(1)
+        #
+        # group.stop()
+        # time.sleep(1)
 
         success = True
         return success
@@ -1063,13 +1038,13 @@ def main():
                 o = bwrap.calculate_release_orientation(np.array([0, 1, 0]))
                 EE_pose.pose.orientation = o
                 print(o)
-                # group.set_pose_target(EE_pose.pose)
-                # group.go(wait=True)
-                # group.clear_pose_targets()
-                # time.sleep(1)
-                #
-                # group.stop()
-                # time.sleep(1)
+                group.set_pose_target(EE_pose.pose)
+                group.go(wait=True)
+                group.clear_pose_targets()
+                time.sleep(1)
+
+                group.stop()
+                time.sleep(1)
 
 
     except rospy.ROSInterruptException:
