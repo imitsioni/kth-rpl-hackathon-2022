@@ -274,7 +274,7 @@ def main():
     print(C)
     print(D)
     closest_corners = [A, B, C, D]
-    final_corners = [C, D, A, B]
+    final_corners = [D, C, B, A]
 
     edge_msg = rospy.wait_for_message('/bbox/geometry', OrientedBoundingBox)
     # edge = 0.08
