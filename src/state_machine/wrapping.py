@@ -21,7 +21,7 @@ import time
 # from copy import deepcopy
 import copy as copy_module
 # import math
-from tf.transformations import quaternion_matrix
+from tf.transformations import quaternion_matrix, quaternion_multiply
 
 # import os, sys
 # from datetime import datetime
@@ -406,18 +406,19 @@ class BaxterWrapping:
         # angle by which we'd like to rotate
         alpha = -20 * np.pi / 180
 
-        quat = [rot_axis[0] * sin(alpha / 2), rot_axis[1] * sin(alpha / 2), rot_axis[2] * sin(alpha / 2), cos(alpha / 2)]
-        R2 = quaternion_matrix(quat)[0:3, 0:3]
+        # transformation from gripper to final position represented in world frame
+        quat_ = [rot_axis[0] * sin(alpha / 2), rot_axis[1] * sin(alpha / 2), rot_axis[2] * sin(alpha / 2), cos(alpha / 2)]
 
-        R12 = np.matmul(R1.T, R2)
-        quat12 = self.rotation_matrix_quaternion(R12)
-
+        # R2 = quaternion_matrix(quat_)[0:3, 0:3]
+        #
+        # R12 = np.matmul(R1.T, R2.T)
+        # quat12 = self.rotation_matrix_quaternion(R12)
+        quat12 = quaternion_multiply(quat_, [quat.x, quat.y, quat.z, quat.w])
         des_orient = Quaternion()
         des_orient.x = quat12[0]
         des_orient.y = quat12[1]
         des_orient.z = quat12[2]
         des_orient.w = quat12[3]
-
         return des_orient
 
     def rotation_matrix_quaternion(self, R):
@@ -587,15 +588,15 @@ class BaxterWrapping:
         self.move_along_line(directions[1], distances[1])
 
         # Get EE position
-        # EE_pose = group.get_current_pose()
-        # EE_pose.pose.orientation = self.calculate_release_orientation(directions[0])
-        # group.set_pose_target(EE_pose.pose)
-        # group.go(wait=True)
-        # group.clear_pose_targets()
-        # time.sleep(1)
-        #
-        # group.stop()
-        # time.sleep(1)
+        EE_pose = group.get_current_pose()
+        EE_pose.pose.orientation = self.calculate_release_orientation(directions[0])
+        group.set_pose_target(EE_pose.pose)
+        group.go(wait=True)
+        group.clear_pose_targets()
+        time.sleep(1)
+
+        group.stop()
+        time.sleep(1)
 
         success = True
         return success

@@ -10,7 +10,8 @@ import numpy as np
 from wrapping import BaxterWrapping
 import moveit_commander
 import time
-from geometry_msgs.msg import Vector3
+from geometry_msgs.msg import Vector3, Point, PointStamped
+from moveit_msgs.msg import OrientedBoundingBox
 import rospy
 from language_server import LanguageServer
 
@@ -224,6 +225,8 @@ def sub_state_machine_fold_corner(counter=0,
                                     final_flag=final_flag),
                                transitions={'sucess': 'folded'})
 
+def convert_to_vec(msg):
+    return Vector3(msg.point.x, msg.point.y, msg.point.z)
 
 def main():
     rospy.init_node('folding_state_machine')
@@ -243,31 +246,50 @@ def main():
     baxter.open_left_gripper()
     baxter.open_right_gripper()
 
-    # Get Box estimations from vision
-    A = Vector3()
-    A.x = 0.872
-    A.y = -0.05
-    A.z = -0.134
+    corner0_msg = rospy.wait_for_message('/bbox_world/corner0', PointStamped)
+    A = convert_to_vec(corner0_msg)
 
-    B = Vector3()
-    B.x = 0.73
-    B.y = 0.09
-    B.z = -0.14
+    corner1_msg = rospy.wait_for_message('/bbox_world/corner1', PointStamped)
+    B = convert_to_vec(corner1_msg)
 
-    C = Vector3()
-    C.x = 0.58
-    C.y = 0.
-    C.z = -0.14
+    corner2_msg = rospy.wait_for_message('/bbox_world/corner2', PointStamped)
+    C = convert_to_vec(corner2_msg)
 
-    D = Vector3()
-    D.x = 0.6
-    D.y = -0.001
-    D.z = -0.14
+    corner3_msg = rospy.wait_for_message('/bbox_world/corner3', PointStamped)
+    D = convert_to_vec(corner3_msg)
+    #
+    # # Get Box estimations from vision
+    # A = Vector3()
+    # A.x = 0.872
+    # A.y = -0.05
+    # A.z = -0.134
+    #
+    # B = Vector3()
+    # B.x = 0.73
+    # B.y = 0.09
+    # B.z = -0.14
+    #
+    # C = Vector3()
+    # C.x = 0.58
+    # C.y = 0.
+    # C.z = -0.14
+    #
+    # D = Vector3()
+    # D.x = 0.6
+    # D.y = -0.001
+    # D.z = -0.14
 
+    print(A)
+    print(B)
+    print(C)
+    print(D)
     closest_corners = [A, B, C, D]
     final_corners = [C, D, A, B]
-    edge = 0.08
 
+    edge_msg = rospy.wait_for_message('/bbox/geometry', OrientedBoundingBox)
+    # edge = 0.08
+    edge = edge_msg.extents.z
+    print(edge)
     # Create a SMACH state machine
     sm_top = smach.StateMachine(outcomes=['final_outcome'])
     sm_top.userdata.sm_counter = 0
