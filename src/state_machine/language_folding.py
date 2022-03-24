@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import roslib
 import rospy
 import smach
 import smach_ros
@@ -31,7 +30,7 @@ class Start(smach.State):
                              output_keys=['foo_counter_out'])
 
     def execute(self, userdata):
-        rospy.loginfo('Executing state Identify Corner')
+        # rospy.loginfo('Executing state Identify Corner')
         time.sleep(2)
         return 'sucess'
 
@@ -52,7 +51,7 @@ class IdentifyCorner(smach.State):
                              output_keys=['foo_counter_out'])
 
     def execute(self, userdata):
-        rospy.loginfo('Executing state Identify Corner')
+        #rospy.loginfo('Executing state Identify Corner')
 
         #TODO: ask which corner to grasp
 
@@ -253,13 +252,13 @@ def main():
 
     # Get Box estimations from vision
     A = Vector3()
-    A.x = 0.825
+    A.x = 0.872
     A.y = -0.05
-    A.z = -0.14
+    A.z = -0.134
 
     B = Vector3()
     B.x = 0.73
-    B.y = 0.11
+    B.y = 0.09
     B.z = -0.14
 
     C = Vector3()
@@ -268,8 +267,8 @@ def main():
     C.z = -0.14
 
     D = Vector3()
-    D.x = 0.72
-    D.y = -0.17
+    D.x = 0.6
+    D.y = -0.001
     D.z = -0.14
 
     closest_corners = [A, B, C, D]
