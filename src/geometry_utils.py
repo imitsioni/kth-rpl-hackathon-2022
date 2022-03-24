@@ -15,8 +15,15 @@ def custom_draw_geometry_with_key_callback(pcd):
         opt = vis.get_render_option()
         opt.background_color = np.asarray([0, 0, 0])
         return False
+
+    def show_coordinate(vis):
+        opt = vis.get_render_option()
+        opt.show_coordinate_frame = True
+        return False
+
     key_to_callback = {}
     key_to_callback[ord("K")] = change_background_to_black
+    key_to_callback[ord("F")] = show_coordinate
     o3d.visualization.draw_geometries_with_key_callbacks(pcd, key_to_callback)
 
 def read_pointcloud(path: str, view: bool = False) -> o3d.geometry.PointCloud:
@@ -140,15 +147,15 @@ def find_plane(pcd: o3d.geometry.PointCloud, max_plane_idx: int = 2, distance_th
     return segments, segment_models
 
 
-def get_plane_distance(select_bbox: o3d.geometry.OrientedBoundingBox, plane: np.array) -> float:
+def get_plane_distance(point: np.array, plane: np.array) -> float:
     '''
     # https://www.geeksforgeeks.org/distance-between-a-point-and-a-plane-in-3-d/
     Function to find distance from the center of bbox to the plane
-    :param select_bbox: input bbox
+    :param point: input bbox
     :param plane: coefficient of a plane
     :return: float
     '''
-    point = select_bbox.get_center()
+    #point = select_bbox.get_center()
     d = abs((plane[0] * point[0] + plane[1] * point[1] + plane[2] * point[2] + plane[3]))
     e = (math.sqrt(plane[0] * plane[0] + plane[1] * plane[1] + plane[2] * plane[2]))
     distance = d / e
@@ -172,6 +179,29 @@ def get_surface_size(selected_bbox: o3d.geometry.OrientedBoundingBox) -> [float,
     y_length = size[1]
     return x_length, y_length
 
+def get_surface_size_from_pcd(pcd: o3d.geometry.PointCloud) -> [float, float, np.array, np.array]:
+    """
+    find the boundary of the point cloud
+    :param pcd: input point cloud
+    :return: length1: float,
+             length2: float,
+             top_surface_corner: np.array,
+             center: np.array
+    """
+    max_index = np.argmax(np.asarray(pcd.points), axis=0)
+    min_index = np.argmin(np.asarray(pcd.points), axis=0)
+
+    max_x = np.asarray(pcd.points)[max_index[0],:]
+    max_y = np.asarray(pcd.points)[max_index[1],:]
+    min_x = np.asarray(pcd.points)[min_index[0],:]
+    min_y = np.asarray(pcd.points)[min_index[1],:]
+
+    top_surface_corner = np.array([max_x, max_y, min_x, min_y])
+    center = np.mean(np.asarray(pcd.points), axis=0)
+
+    length1 = max(np.linalg.norm(min_x - max_y) , np.linalg.norm(min_y -max_x)) #(np.linalg.norm(min_x - max_y) + np.linalg.norm(min_y - max_x)) / 2.
+    length2 = max(np.linalg.norm(min_x - min_y), np.linalg.norm(max_y -max_x)) #(np.linalg.norm(min_x - min_y) + np.linalg.norm(max_y - max_x)) / 2.
+    return length1, length2, top_surface_corner, center
 
 def get_width_length_height(pcd, max_plane_idx=2, view=False) -> [np.array, np.array, np.array]:
     """
@@ -191,39 +221,58 @@ def get_width_length_height(pcd, max_plane_idx=2, view=False) -> [np.array, np.a
     table_plane = segment_models[table_index]
     box_index = np.argsort(-point_length)[1]  # second largest indices
     box_points = segments[box_index]
-    ## obtain geometry information from box points
-    box_bbox = box_points.get_oriented_bounding_box()
-    center = box_points.get_center()
-    x_length, y_length = get_surface_size(selected_bbox=box_bbox)
-    height = get_plane_distance(select_bbox=box_bbox, plane=table_plane)
-    
-    # calculate top surface 4 corners
-    original_rotation = box_bbox.R
-    lu = np.array([-x_length/2, y_length/2, 0])  # left up
-    ld = np.array([-x_length/2, -y_length/2,0])  # left down
-    ru =np.array([x_length/2, y_length/2,0])     # right up
-    rd = np.array([x_length/2, -y_length/2,0])   # right down
-    luu = np.matmul(original_rotation, lu) + center
-    ldd = np.matmul(original_rotation, ld) + center
-    ruu = np.matmul(original_rotation, ru) + center
-    rdd = np.matmul(original_rotation, rd) + center
-    top_surface_corners = np.array([luu, ldd, ruu, rdd])
 
+    new_lenght_1, new_lenght_2, new_top_surface_corners, new_center = get_surface_size_from_pcd(pcd=box_points)
+    new_height = get_plane_distance(point=new_center, plane=table_plane)
+    # # --------------------------------------------------------------------
+    # ## obtain geometry information from box points
+    # box_bbox = box_points.get_oriented_bounding_box()
+    # center = box_points.get_center()
+    # x_length, y_length = get_surface_size(selected_bbox=box_bbox)
+    # height = get_plane_distance(point=center, plane=table_plane)
+    #
+    # # calculate top surface 4 corners
+    # original_rotation = box_bbox.R
+    # lu = np.array([-x_length/2, y_length/2, 0])  # left up
+    # ld = np.array([-x_length/2, -y_length/2,0])  # left down
+    # ru =np.array([x_length/2, y_length/2,0])     # right up
+    # rd = np.array([x_length/2, -y_length/2,0])   # right down
+    # luu = np.matmul(original_rotation, lu) + center
+    # ldd = np.matmul(original_rotation, ld) + center
+    # ruu = np.matmul(original_rotation, ru) + center
+    # rdd = np.matmul(original_rotation, rd) + center
+    # top_surface_corners = np.array([luu, ldd, ruu, rdd])
+    #--------------------------------------------------------------------
     if view:
-        test_pcd = o3d.geometry.PointCloud()
-        test_pcd.points = o3d.utility.Vector3dVector(top_surface_corners)
-        colorpoint = np.zeros_like(top_surface_corners)
-        colorpoint[:] = np.array([1, 0, 0])
-        test_pcd.colors = o3d.utility.Vector3dVector(colorpoint)
+        # test_pcd = o3d.geometry.PointCloud()
+        # test_pcd.points = o3d.utility.Vector3dVector(top_surface_corners)
+        # colorpoint = np.zeros_like(top_surface_corners)
+        # colorpoint[:] = np.array([0, 1, 1])
+        # test_pcd.colors = o3d.utility.Vector3dVector(colorpoint)
+        #
+        # test2_pcd = o3d.geometry.PointCloud()
+        # test2_pcd.points = o3d.utility.Vector3dVector(box_bbox.get_center().reshape(1, -1))
+        # color2point = np.zeros_like(box_bbox.get_center().reshape(1, -1))
+        # color2point[:] = np.array([0, 1, 0])
+        # test2_pcd.colors = o3d.utility.Vector3dVector(color2point)
+        #
+        # test_box_pcd = o3d.geometry.PointCloud()
+        # test_box_pcd.points = o3d.utility.Vector3dVector(np.asarray(box_bbox.get_box_points()))
+        # test_colorpoint = np.zeros_like(np.asarray(box_bbox.get_box_points()))
+        # test_colorpoint[:] = np.array([0, 1, 0])
+        # test_box_pcd.colors = o3d.utility.Vector3dVector(test_colorpoint)
 
-        test2_pcd = o3d.geometry.PointCloud()
-        test2_pcd.points = o3d.utility.Vector3dVector(box_bbox.get_center().reshape(1, -1))
-        color2point = np.zeros_like(box_bbox.get_center().reshape(1, -1))
-        color2point[:] = np.array([0, 1, 0])
-        test2_pcd.colors = o3d.utility.Vector3dVector(color2point)
-        custom_draw_geometry_with_key_callback([segments[i] for i in range(max_plane_idx)] + [test_pcd] + [test2_pcd])
-    
-    return np.array([x_length, y_length, height]), center, top_surface_corners
+        new_test_box_pcd = o3d.geometry.PointCloud()
+        new_test_box_pcd.points = o3d.utility.Vector3dVector(np.vstack([new_top_surface_corners, new_center]))
+        new_test_box_colorpoint = np.zeros_like(np.vstack([new_top_surface_corners, new_center]))
+        new_test_box_colorpoint[:] = np.array([1, 0, 0])
+        new_test_box_pcd.colors = o3d.utility.Vector3dVector(new_test_box_colorpoint)
+
+        #custom_draw_geometry_with_key_callback([new_test_box_pcd]+ [segments[i] for i in range(max_plane_idx)]+ [test_pcd] + [test2_pcd] + [test_box_pcd] )
+        custom_draw_geometry_with_key_callback([segments[i] for i in range(max_plane_idx)]+[new_test_box_pcd])
+
+    #return np.array([x_length, y_length, height]), center, top_surface_corners
+    return np.array([new_lenght_1, new_lenght_2, new_height]),new_center, new_top_surface_corners
 
 
 ### below refer to https://github.com/kaku756/icp_calib/blob/b6f9af98019990f6111836dcbad4e97e5b69f692/scripts/lib_cloud_conversion_between_Open3D_and_ROS.py
