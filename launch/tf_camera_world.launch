@@ -1,0 +1,9 @@
+<launch>
+<!--  KINECT0PRIMESENSE ONLY!!!-->
+   <node pkg="tf"
+       type="static_transform_publisher"
+       name="world_camera_tf"
+       args="0.219 0.120 0.227 -0.025 0.323 -0.022 0.946 world camera_link 10" 
+    />
+
+</launch>
