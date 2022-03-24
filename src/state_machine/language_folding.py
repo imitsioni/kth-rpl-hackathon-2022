@@ -75,23 +75,16 @@ class GraspCorner(smach.State):
 
     def execute(self, userdata):
         # Ask human to start grasping
-        self.lang_server.ask_for_start_grasping()
-
-        # Verify that the corner is visible
-        rospy.loginfo('Checking Corner Visibility')
-        corner = self.corner_id
-        visible = self.baxter.check_marker_visibility(corner)
-
-        while not visible:
-            rospy.loginfo('Corner NOT Visible')
-            rospy.sleep(1)
-            visible = self.baxter.check_marker_visibility(corner)
+        #self.lang_server.ask_for_start_grasping()
+        self.lang_server.plese_propose_corner()
+        self.baxter.propose_corner()
+        self.corner_id = self.baxter.active_corner
 
         # Grasp corner
         rospy.loginfo('Executing state Grasp Corner')
         # rospy.loginfo('Counter = %f' % userdata.bar_counter_in)
 
-        self.baxter.grasp(corner)  # int
+        self.baxter.grasp(self.corner_id)  # int
 
         # Human will tell "CLOSE"
         self.lang_server.ask_for_close_gripper()
@@ -134,7 +127,7 @@ class Fold(smach.State):
                              ])
 
         self.baxter = baxter
-        self.corner_id = corner_id
+        self.corner_id = 0
         self.edge = edge
         self.closest_corners = closest_corners
         self.final_corners = final_corners
@@ -144,7 +137,7 @@ class Fold(smach.State):
         rospy.loginfo('Executing state Fold')
         time.sleep(0.5)
         # Place
-        corner = self.corner_id
+        corner = self.baxter.active_corner
         edge = self.edge
 
         self.baxter.place(self.closest_corners[corner],

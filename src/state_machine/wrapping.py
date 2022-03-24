@@ -404,7 +404,7 @@ class BaxterWrapping:
         print("rot_axis: ")
         print(rot_axis)
         # angle by which we'd like to rotate
-        alpha = -20 * np.pi / 180
+        alpha = 20 * np.pi / 180
 
         quat = [rot_axis[0] * sin(alpha / 2), rot_axis[1] * sin(alpha / 2), rot_axis[2] * sin(alpha / 2), cos(alpha / 2)]
         R2 = quaternion_matrix(quat)[0:3, 0:3]
@@ -587,15 +587,15 @@ class BaxterWrapping:
         self.move_along_line(directions[1], distances[1])
 
         # Get EE position
-        # EE_pose = group.get_current_pose()
-        # EE_pose.pose.orientation = self.calculate_release_orientation(directions[0])
-        # group.set_pose_target(EE_pose.pose)
-        # group.go(wait=True)
-        # group.clear_pose_targets()
-        # time.sleep(1)
-        #
-        # group.stop()
-        # time.sleep(1)
+        EE_pose = group.get_current_pose()
+        EE_pose.pose.orientation = self.calculate_release_orientation(directions[0])
+        group.set_pose_target(EE_pose.pose)
+        group.go(wait=True)
+        group.clear_pose_targets()
+        time.sleep(1)
+
+        group.stop()
+        time.sleep(1)
 
         success = True
         return success

@@ -92,7 +92,7 @@ class LanguageServer:
         with sr.WavFile(urlopen(self.asocket)) as source:
             print("Say something!")
             # self.r.adjust_for_ambient_noise(source, duration=1)
-            audio = self.r.listen(source, phrase_time_limit=5)
+            audio = self.r.listen(source, phrase_time_limit=3)
         return audio
 
     def recognize(self, audio):
@@ -151,6 +151,9 @@ class LanguageServer:
 
     def ask_for_folding_correction(self):
         self.say_word("Please correct the folding of the current corner")
+
+    def plese_propose_corner(self):
+        self.say_word('Please propose a corner!')
 
     def ask_for_start_grasping(self):
         while True:
@@ -254,14 +257,14 @@ def synthesize_text(text):
 
 if __name__ == "__main__":
     sp = LanguageServer()
-    # sp.say_word("How")
-    # sp.say_word("are")
-    # sp.say_word("you doing?")
+    sp.say_word("How")
+    sp.say_word("are")
+    sp.say_word("you doing?")
     # sp.list_answer_options_corners()
     # sp.list_available_answers()
     # sp.ask_for_close_gripper()
     # sp.ask_for_start_grasping()
     # sp.ask_if_folding_correct()
     # sp.ask_for_folding_correction()
-    sp.broadcast()
+    #sp.broadcast()
     # synthesize_text("hello")
