@@ -2,7 +2,9 @@ import time
 import json
 import numpy as np
 import speech_recognition as sr
-from urllib.request import urlopen
+# from urllib.request import urlopen
+# from urllib2 import urlopen
+from future.moves.urllib.request import urlopen, Request
 import pyttsx3
 import rospy
 
@@ -252,14 +254,14 @@ def synthesize_text(text):
 
 if __name__ == "__main__":
     sp = LanguageServer()
-    sp.say_word("How")
-    sp.say_word("are")
-    sp.say_word("you doing?")
+    # sp.say_word("How")
+    # sp.say_word("are")
+    # sp.say_word("you doing?")
     # sp.list_answer_options_corners()
     # sp.list_available_answers()
     # sp.ask_for_close_gripper()
     # sp.ask_for_start_grasping()
     # sp.ask_if_folding_correct()
     # sp.ask_for_folding_correction()
-    # sp.broadcast()
+    sp.broadcast()
     # synthesize_text("hello")
