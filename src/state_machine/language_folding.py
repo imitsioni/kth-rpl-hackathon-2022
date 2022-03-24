@@ -13,6 +13,7 @@ import moveit_commander
 import time
 from geometry_msgs.msg import Vector3
 import rospy
+from language_server import LanguageServer
 
 ## Planning imports
 
@@ -41,8 +42,10 @@ class IdentifyCorner(smach.State):
                  outcomes=['sucess'],
                  input_keys=['baxter'],
                  output_keys=['foo_counter_out'],
-                 baxter=None):
+                 baxter=None,
+                 lang_server=None):
         self.baxter = baxter
+        self.lang_server = lang_server
         smach.State.__init__(self,
                              outcomes=outcomes,
                              input_keys=['baxter'],
@@ -63,18 +66,17 @@ class IdentifyCorner(smach.State):
 # define state Bar
 class GraspCorner(smach.State):
 
-    def __init__(self, baxter=None, corner_id=None):
+    def __init__(self, baxter=None, corner_id=None, lang_server=None):
         smach.State.__init__(self,
                              outcomes=['sucess'],
                              input_keys=['baxter', 'corner_id'])
         self.corner_id = corner_id
         self.baxter = baxter
+        self.lang_server = lang_server
 
     def execute(self, userdata):
         # Ask human to start grasping
-        start_grasp = 'n'
-        while start_grasp != 'y':
-            start_grasp = raw_input("Start Grasping? [y]/[n]")
+        self.lang_server.ask_for_start_grasping()
 
         # Verify that the corner is visible
         rospy.loginfo('Checking Corner Visibility')
@@ -93,9 +95,7 @@ class GraspCorner(smach.State):
         self.baxter.grasp(corner)  # int
 
         # Human will tell "CLOSE"
-        close = 'n'
-        while close != 'y':
-            close = raw_input("Close gripper? [y]/[n]")
+        self.lang_server.ask_for_close_gripper()
 
         self.baxter.close_gripper()
         time.sleep(2)
@@ -106,9 +106,10 @@ class GraspCorner(smach.State):
 # define state Bar
 class Stretch(smach.State):
 
-    def __init__(self, baxter):
+    def __init__(self, baxter, lang_server=None):
         smach.State.__init__(self, outcomes=['sucess'], input_keys=['baxter'])
         self.baxter = baxter
+        self.lang_server = lang_server
 
     def execute(self, userdata):
         rospy.loginfo('Executing state Stretch')
@@ -124,8 +125,8 @@ class Stretch(smach.State):
 
 class Fold(smach.State):
 
-    def __init__(self, baxter, corner_id, edge, closest_corners,
-                 final_corners):
+    def __init__(self, baxter, corner_id, edge, closest_corners, final_corners,
+                 lang_server):
         smach.State.__init__(self,
                              outcomes=['sucess'],
                              input_keys=[
@@ -138,6 +139,7 @@ class Fold(smach.State):
         self.edge = edge
         self.closest_corners = closest_corners
         self.final_corners = final_corners
+        self.lang_server = lang_server
 
     def execute(self, userdata):
         rospy.loginfo('Executing state Fold')
@@ -156,9 +158,10 @@ class Fold(smach.State):
 
 class Goal(smach.State):
 
-    def __init__(self, baxter):
+    def __init__(self, baxter, lang_server):
         smach.State.__init__(self, outcomes=['sucess'], input_keys=['baxter'])
         self.baxter = baxter
+        self.lang_server = lang_server
 
     def execute(self, userdata):
         rospy.loginfo('Executing state GOAL')
@@ -184,42 +187,50 @@ def sub_state_machine_fold_corner(counter=0,
                                   edge=None,
                                   final_corners=None,
                                   closest_corners=None,
-                                  corner_id=None):
+                                  corner_id=None,
+                                  lang_server=None):
     smach.StateMachine.add(
         'IdentifyCorner_' + str(counter),
-        IdentifyCorner(baxter=baxter),
+        IdentifyCorner(baxter=baxter, lang_server=lang_server),
         transitions={'sucess': 'GraspCorner_' + str(counter)})
 
     smach.StateMachine.add('GraspCorner_' + str(counter),
-                           GraspCorner(baxter=baxter, corner_id=corner_id),
+                           GraspCorner(baxter=baxter,
+                                       corner_id=corner_id,
+                                       lang_server=lang_server),
                            transitions={
                                'sucess': 'Stretch_' + str(counter),
                            })
 
     smach.StateMachine.add('Stretch_' + str(counter),
-                           Stretch(baxter=baxter),
+                           Stretch(baxter=baxter, lang_server=lang_server),
                            transitions={
                                'sucess': 'Fold_' + str(counter),
                            })
 
     smach.StateMachine.add('Fold_' + str(counter),
-                           Fold(baxter, corner_id, edge, closest_corners,
-                                final_corners),
+                           Fold(baxter,
+                                corner_id,
+                                edge,
+                                closest_corners,
+                                final_corners,
+                                lang_server=lang_server),
                            transitions={'sucess': 'Goal_' + str(counter)})
 
     if not final_flag:
         smach.StateMachine.add(
             'Goal_' + str(counter),
-            Goal(baxter),
+            Goal(baxter, lang_server=lang_server),
             transitions={'sucess': 'IdentifyCorner_' + str(counter + 1)})
     else:
         smach.StateMachine.add('Goal_' + str(counter),
-                               Goal(baxter),
+                               Goal(baxter, lang_server=lang_server),
                                transitions={'sucess': 'folded'})
 
 
 def main():
     rospy.init_node('folding_state_machine')
+    lang_server = LanguageServer()
 
     # remap again
     joint_state_topic = ['joint_states:=/robot/joint_states']
@@ -296,21 +307,24 @@ def main():
                                           edge=edge,
                                           final_corners=final_corners,
                                           corner_id=0,
-                                          closest_corners=closest_corners)
+                                          closest_corners=closest_corners,
+                                          lang_server=lang_server)
             sm_sub.userdata.corner_id = 1
             sub_state_machine_fold_corner(counter=1,
                                           baxter=baxter,
                                           edge=edge,
                                           final_corners=final_corners,
                                           corner_id=1,
-                                          closest_corners=closest_corners)
+                                          closest_corners=closest_corners,
+                                          lang_server=lang_server)
             sm_sub.userdata.corner_id = 2
             sub_state_machine_fold_corner(counter=2,
                                           baxter=baxter,
                                           edge=edge,
                                           final_corners=final_corners,
                                           corner_id=2,
-                                          closest_corners=closest_corners)
+                                          closest_corners=closest_corners,
+                                          lang_server=lang_server)
             sm_sub.userdata.corner_id = 3
             sub_state_machine_fold_corner(counter=3,
                                           final_flag=True,
@@ -318,7 +332,8 @@ def main():
                                           edge=edge,
                                           final_corners=final_corners,
                                           corner_id=3,
-                                          closest_corners=closest_corners)
+                                          closest_corners=closest_corners,
+                                          lang_server=lang_server)
 
         smach.StateMachine.add('FinalGoal',
                                sm_sub,

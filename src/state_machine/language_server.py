@@ -4,6 +4,7 @@ import numpy as np
 import speech_recognition as sr
 from urllib.request import urlopen
 import pyttsx3
+import rospy
 
 
 class LanguageServer:
@@ -121,20 +122,94 @@ class LanguageServer:
     ##################
     ##### BAXTER #####
     ##################
+    def list_answer_options_corners(self):
+        str_answer = 'Available corner options are:    '
+        for _ in self.available_corners:
+            str_answer += _ + " or "
+        self.say_word(str_answer)
+
+    def list_available_answers(self):
+        str_answer = 'Available answers are: '
+        for _ in self.available_answers:
+            str_answer += _ + " or "
+        self.say_word(str_answer)
+
     def get_corner_id_voice(self):
         while True:
             audio = self.get_audio()
             recognized_str = str(self.recognize(audio))
             print(recognized_str)
             self.say_word(recognized_str)
-            # synthesize_text(recognized_str)
-            # time.sleep(1)
+        return corner_id
+        # synthesize_text(recognized_str)
+        # time.sleep(1)
 
     def ask_if_folding_correct(self):
         self.say_word("Is the folding for this corner correct?")
 
     def ask_for_folding_correction(self):
         self.say_word("Please correct the folding of the current corner")
+
+    def ask_for_start_grasping(self):
+        while True:
+            self.say_word("Would you for me to start grasping?")
+            rospy.loginfo("Baxter: Can I Start grasping?")
+            audio = self.get_audio()
+            recognized_str = str(self.recognize(audio))
+            rospy.loginfo('String detected: {}'.format(recognized_str))
+            if recognized_str in self.available_answers:
+                if recognized_str == 'no':
+                    self.say_word("Standing still")
+                elif recognized_str == 'close' or recognized_str == 'open':
+                    self.say_word("Did I ask anything about the gripper?")
+                else:
+                    self.say_word("Starting grasping")
+                    rospy.loginfo("Baxter: Starting grasping")
+                    break
+            else:
+                self.say_word("Did not understand your answer")
+                self.list_available_answers()
+        return True, recognized_str
+
+    def ask_for_close_gripper(self):
+        while True:
+            self.say_word("Can I close the gripper?")
+            rospy.loginfo("Baxter: Can I close the gripper?")
+            audio = self.get_audio()
+            recognized_str = str(self.recognize(audio))
+            rospy.loginfo('String detected: {}'.format(recognized_str))
+            if recognized_str in self.available_answers:
+                if recognized_str == 'no' or recognized_str == 'open':
+                    self.say_word("Opening Gripper")
+                else:
+                    self.say_word("Closing the gripper")
+                    rospy.loginfo("Baxter: Closing the gripper")
+                    break
+
+            else:
+                self.say_word("Did not understand your answer")
+                self.list_available_answers()
+        return True, recognized_str
+
+    def ask_for_corner(self):
+        self.say_word("Do you want me to grasp another corner?")
+        rospy.loginfo("Baxter: Can I close the gripper?")
+        while True:
+            audio = self.get_audio()
+            recognized_str = str(self.recognize(audio))
+            rospy.loginfo('String detected: {}'.format(recognized_str))
+            if recognized_str in self.available_answers:
+                if recognized_str == 'no' or recognized_str == 'open':
+                    self.say_word("Can I close the gripper now?")
+                else:
+                    self.say_word("Closing the gripper")
+                    rospy.loginfo("Baxter: Closing the gripper")
+                    break
+
+            else:
+                self.say_word("Did not understand your answer")
+                self.list_available_answers()
+        return True, recognized_str
 
 
 def synthesize_text(text):
@@ -170,7 +245,11 @@ def synthesize_text(text):
 
 if __name__ == "__main__":
     sp = LanguageServer()
-    sp.ask_if_folding_correct()
-    sp.ask_for_folding_correction()
+    # sp.list_answer_options_corners()
+    # sp.list_available_answers()
+    # sp.ask_for_close_gripper()
+    sp.ask_for_start_grasping()
+    # sp.ask_if_folding_correct()
+    # sp.ask_for_folding_correction()
     # sp.broadcast()
     # synthesize_text("hello")
