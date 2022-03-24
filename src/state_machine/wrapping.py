@@ -348,10 +348,11 @@ class BaxterWrapping:
         tag_ids = [5, 9, 4, 3]
         self.detected_corner = [False for i in range(4)]
         for tag in msg.detections:
-            self.grasping_points[tag_ids.index(tag.id[0])] = self.transform_to_world(np.array([tag.pose.pose.pose.position.x,
-                                                     tag.pose.pose.pose.position.y,
-                                                     tag.pose.pose.pose.position.z]))
-            self.detected_corner[tag_ids.index(tag.id[0])] = True
+            if tag.id[0] in tag_ids:
+                self.grasping_points[tag_ids.index(tag.id[0])] = self.transform_to_world(np.array([tag.pose.pose.pose.position.x,
+                                                         tag.pose.pose.pose.position.y,
+                                                         tag.pose.pose.pose.position.z]))
+                self.detected_corner[tag_ids.index(tag.id[0])] = True
 
     def check_marker_visibility(self, id):
         return self.detected_corner[id]

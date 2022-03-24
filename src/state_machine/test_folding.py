@@ -152,6 +152,7 @@ class Goal(smach.State):
         rospy.loginfo('Executing state GOAL')
         # Open gripper
         self.baxter.open_gripper()
+        time.sleep(1)
         # Added upwards movement
         self.baxter.move_along_line(np.array([0., 0., 1]), 0.04)
 

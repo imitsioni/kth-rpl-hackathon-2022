@@ -19,10 +19,10 @@
 <!--   <include file="$(find realsense2_camera)/launch/rs_camera.launch"/> -->
 
 
-<!--   <include file="$(find realsense2_camera)/launch/rs_camera.launch"> -->
-<!--      <arg name="filters" value="pointcloud,spatial,temporal" /> -->
-<!--      <arg name="align_depth" value="true" /> -->
-<!--   </include> -->
+<include file="$(find realsense2_camera)/launch/rs_camera.launch">
+      <arg name="filters" value="pointcloud,spatial,temporal" />
+      <arg name="align_depth" value="true" />
+</include>
 
   <!--include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
   </include>-->
@@ -49,6 +49,12 @@
         name="world_camera_tf"
         args="0.139 0.088 0.537 -0.602 0.690 -0.274 0.294 world camera_link 10" />
 
+   <!--  KINECT0PRIMESENSE ONLY!!!
+    <node pkg="tf"
+        type="static_transform_publisher"
+        name="world_camera_tf"
+        args="0.219 0.120 0.227 -0.025 0.323 -0.022 0.946 world camera_link 10" />
+ -->
 
     
 
