@@ -19,7 +19,7 @@ class LanguageServer:
                  file_path='mic_config.json',
                  folder_path='Salli',
                  folder_path_kid='Ivy',
-                 flag_kid_voice=False):
+                 flag_kid_voice=True):
         self.file_path = file_path
         self.config = self._load_config()
         self.playsound = playsound
@@ -208,7 +208,9 @@ class LanguageServer:
             recognized_str = str(self.recognize(audio))
             rospy.loginfo('String detected: {}'.format(recognized_str))
             if 'yes' in recognized_str:
-                self.say_word("Closing the gripper")
+                #self.say_word("Closing the gripper")
+                self.playsound(self.voice_path + '/' +
+                               'closing_gripper.mp3')
                 rospy.loginfo("Baxter: Closing the gripper")
                 break
 
@@ -271,7 +273,7 @@ class LanguageServer:
         return True, recognized_str
 
     def thanking_for_participating(self):
-        self.say_word("Thank you for participating in the folding with Baxter")
+        #self.say_word("Thank you for participating in the folding with Baxter")
         self.playsound(self.voice_path + '/' + 'thanks.mp3')
 
 

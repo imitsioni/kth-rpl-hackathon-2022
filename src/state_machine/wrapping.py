@@ -371,6 +371,15 @@ class BaxterWrapping:
             else:
                 print("Corner not proposed yet")
 
+            # pos = PoseStamped()
+            # pos.pose.position.x = self.grasping_points[id][0]
+            # pos.pose.position.y = self.grasping_points[id][1]
+            # pos.pose.position.z = self.grasping_points[id][2] + 0.04
+            # pos.pose.orientation.x = 0.
+            # pos.pose.orientation.y = 1.
+            # pos.pose.orientation.z = 0.
+            # pos.pose.orientation.w = 0.0
+
     def calculate_release_orientation(self, movedir):
         """
             calculate the global pose of the endeffector to release the cloth
@@ -669,11 +678,11 @@ class BaxterWrapping:
 
         # move head depending on the arm that will move
         print("Selected arm: ", key)
-        # if key == "left":
-        #     self.head.set_pan(0.5)
-        #
-        # if key == "right":
-        #     self.head.set_pan(-0.5)
+        if key == "left":
+            self.head.set_pan(-1.3)
+
+        if key == "right":
+            self.head.set_pan(1.3)
 
         self.arm = key
 
