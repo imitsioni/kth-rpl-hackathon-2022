@@ -1,19 +1,29 @@
+from datetime import date
 import time
 import json
 import numpy as np
 import speech_recognition as sr
+#import playsound
 # from urllib.request import urlopen
 # from urllib2 import urlopen
 from future.moves.urllib.request import urlopen, Request
 import pyttsx3
 import rospy
 
+from playsound import playsound
+
 
 class LanguageServer:
 
-    def __init__(self, file_path='mic_config.json'):
+    def __init__(self,
+                 file_path='mic_config.json',
+                 folder_path='Salli',
+                 folder_path_kid='Ivy',
+                 flag_kid_voice=False):
         self.file_path = file_path
         self.config = self._load_config()
+        self.playsound = playsound
+        self.voice_path = folder_path if not flag_kid_voice else folder_path_kid
         #Load YOLO
         self.r, self.asocket = self._load_network_properties()
         self.engine = pyttsx3.init()
@@ -128,12 +138,14 @@ class LanguageServer:
         str_answer = 'Available corner options are:    '
         for _ in self.available_corners:
             str_answer += _ + " or "
+        print(str_answer)
         self.say_word(str_answer)
 
     def list_available_answers(self):
         str_answer = 'Available answers are: '
         for _ in self.available_answers:
             str_answer += _ + " or "
+        print(str_answer)
         self.say_word(str_answer)
 
     def get_corner_id_voice(self):
@@ -147,6 +159,7 @@ class LanguageServer:
         # time.sleep(1)
 
     def ask_if_folding_correct(self):
+
         self.say_word("Is the folding for this corner correct?")
 
     def ask_for_folding_correction(self):
@@ -159,6 +172,11 @@ class LanguageServer:
             audio = self.get_audio()
             recognized_str = str(self.recognize(audio))
             rospy.loginfo('String detected: {}'.format(recognized_str))
+            if 'yes' in recognized_str:
+                self.say_word("Starting grasping")
+                rospy.loginfo("Baxter: Starting grasping")
+                break
+
             if recognized_str in self.available_answers:
                 if recognized_str == 'no':
                     self.say_word("Standing still")
@@ -170,55 +188,87 @@ class LanguageServer:
                     rospy.loginfo("Baxter: Starting grasping")
                     break
             else:
-                self.say_word("Did not understand your answer")
+                #self.say_word("Did not understand your answer")
+                self.playsound(self.voice_path + '/' +
+                               'did_not_understand_answer')
                 self.list_available_answers()
         return True, recognized_str
 
     def ask_for_close_gripper(self):
         while True:
-            self.say_word("Can I close the gripper?")
+            ##self.say_word("Can I close the gripper?")
+            self.playsound(self.voice_path + '/' +
+                           'Should I close gripper.mp3')
             rospy.loginfo("Baxter: Can I close the gripper?")
             audio = self.get_audio()
             recognized_str = str(self.recognize(audio))
             rospy.loginfo('String detected: {}'.format(recognized_str))
+            if 'yes' in recognized_str:
+                self.say_word("Closing the gripper")
+                rospy.loginfo("Baxter: Closing the gripper")
+                break
+
             if recognized_str in self.available_answers:
                 if recognized_str == 'no' or recognized_str == 'open':
-                    self.say_word("Opening Gripper")
+                    #self.say_word("Opening the Gripper")
+                    self.playsound(self.voice_path + '/' +
+                                   'opening_gripper.mp3')
+
                 else:
-                    self.say_word("Closing the gripper")
+                    #self.say_word("Closing the gripper")
+                    self.playsound(self.voice_path + '/' +
+                                   'closing_gripper.mp3')
                     rospy.loginfo("Baxter: Closing the gripper")
                     break
 
             else:
-                self.say_word("Did not understand your answer")
+                #self.say_word("Did not understand your answer")
+                self.playsound(self.voice_path + '/' +
+                               'did_not_understand_answer')
                 self.list_available_answers()
         return True, recognized_str
 
     def ask_for_corner(self):
-        self.say_word("Do you want to propose another corner?")
+        #self.say_word("Do you want to propose a corner for folding?")
+        self.playsound(self.voice_path + '/' + 'do_want_propose_corner.mp3')
+
         rospy.loginfo("Baxter: Grasp Another Corner?")
         while True:
             audio = self.get_audio()
             recognized_str = str(self.recognize(audio))
             rospy.loginfo('String detected: {}'.format(recognized_str))
+            if 'yes' in recognized_str:
+                #self.say_word("Please propose a corner")
+                self.playsound(self.voice_path + '/' + 'please_corner.mp3')
+
+                rospy.loginfo("Baxter: Waiting for you!")
+                break
+
             if recognized_str in self.available_answers:
                 if recognized_str == 'no':
                     self.say_word("Standing still")
                     time.sleep(5)
                 elif recognized_str == 'close' or recognized_str == 'open':
-                    self.say_word("Did I ask anything about the gripper?")
+                    #self.say_word("Did I ask anything about the gripper?")
+                    self.playsound(self.voice_path + '/' +
+                                   'did_not_understand_answer')
                 else:
-                    self.say_word("Waiting for you!")
+                    #self.say_word("Please propose a corner")
+                    self.playsound(self.voice_path + '/' + 'please_corner.mp3')
+
                     rospy.loginfo("Baxter: Waiting for you!")
                     break
 
             else:
-                self.say_word("Did not understand your answer")
+                #self.say_word("Did not understand your answer")
+                self.playsound(self.voice_path + '/' +
+                               'did_not_understand_answer')
                 self.list_available_answers()
         return True, recognized_str
 
     def thanking_for_participating(self):
         self.say_word("Thank you for participating in the folding with Baxter")
+        self.playsound(self.voice_path + '/' + 'thanks.mp3')
 
 
 def synthesize_text(text):
@@ -256,12 +306,9 @@ if __name__ == "__main__":
     sp = LanguageServer()
     # sp.say_word("How")
     # sp.say_word("are")
-    # sp.say_word("you doing?")
-    # sp.list_answer_options_corners()
-    # sp.list_available_answers()
-    # sp.ask_for_close_gripper()
+    # sp.say_word("you doing?")LanguageServer
     # sp.ask_for_start_grasping()
     # sp.ask_if_folding_correct()
     # sp.ask_for_folding_correction()
-    sp.broadcast()
+    # sp.broadcast()
     # synthesize_text("hello")

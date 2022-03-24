@@ -76,7 +76,7 @@ class GraspCorner(smach.State):
 
     def execute(self, userdata):
         # Ask human to start grasping
-        self.lang_server.ask_for_start_grasping()
+        self.lang_server.ask_for_corner()
 
         # Verify that the corner is visible
         rospy.loginfo('Checking Corner Visibility')
