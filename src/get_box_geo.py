@@ -6,9 +6,9 @@ from geometry_msgs.msg import Point, PointStamped
 import ctypes
 import struct
 import copy
-import tf
+# import tf
 import numpy as np
-from tf.transformations import quaternion_matrix
+# from tf.transformations import quaternion_matrix
 
 class box_geometry:
     def __init__(self) -> None:
@@ -33,7 +33,6 @@ class box_geometry:
         self.pub_corner2 = rospy.Publisher("bbox/corner2", PointStamped, queue_size=1)
         self.pub_corner3 = rospy.Publisher("bbox/corner3", PointStamped, queue_size=1)
         """
-        
         self.pub_corner0_world = rospy.Publisher("bbox_world/corner0", PointStamped, queue_size=1)
         self.pub_corner1_world = rospy.Publisher("bbox_world/corner1", PointStamped, queue_size=1)
         self.pub_corner2_world = rospy.Publisher("bbox_world/corner2", PointStamped, queue_size=1)
@@ -52,9 +51,13 @@ class box_geometry:
         print(trans,rotm)
         """
         trans = [0.2184907002920966, 0.10004434430211705, 0.2282298046491542] 
-        rotm = [-0.6358874578790518, 0.6328879887381128, -0.3349407207381798, 0.2879490375301368]
-        rotm = quaternion_matrix(rotm)
-        rotm = rotm[0:3, 0:3]
+        # rotm = [-0.6358874578790518, 0.6328879887381128, -0.3349407207381798, 0.2879490375301368]
+        # rotm = quaternion_matrix(rotm)
+        # rotm = rotm[0:3, 0:3]
+        rotm = np.array([[-0.02546499, -0.61199935,  0.79044818],
+                        [-0.99778278, -0.03307629, -0.05775356],
+                        [ 0.06149023, -0.79016628, -0.60980013]])
+
         new_pos = trans + rotm.dot(pos)
         # return Point(new_pos[0], new_pos[1], new_pos[2])
         return new_pos
