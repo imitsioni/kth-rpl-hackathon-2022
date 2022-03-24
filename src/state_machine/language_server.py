@@ -166,7 +166,8 @@ class LanguageServer:
         self.say_word("Please correct the folding of the current corner")
 
     def plese_propose_corner(self):
-        self.say_word('Please propose a corner!')
+        #self.say_word('Please propose a corner!')
+        self.playsound(self.voice_path + '/' + 'please_corner.mp3')
 
     def ask_for_start_grasping(self):
         while True:
@@ -201,7 +202,7 @@ class LanguageServer:
         while True:
             ##self.say_word("Can I close the gripper?")
             self.playsound(self.voice_path + '/' +
-                           'Should I close gripper.mp3')
+                           'should_I_close_gripper.mp3')
             rospy.loginfo("Baxter: Can I close the gripper?")
             audio = self.get_audio()
             recognized_str = str(self.recognize(audio))
@@ -242,7 +243,7 @@ class LanguageServer:
             rospy.loginfo('String detected: {}'.format(recognized_str))
             if 'yes' in recognized_str:
                 #self.say_word("Please propose a corner")
-                self.playsound(self.voice_path + '/' + 'please_corner.mp3')
+                #self.playsound(self.voice_path + '/' + 'please_corner.mp3')
 
                 rospy.loginfo("Baxter: Waiting for you!")
                 break

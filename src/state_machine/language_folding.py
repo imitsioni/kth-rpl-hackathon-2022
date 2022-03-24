@@ -225,8 +225,10 @@ def sub_state_machine_fold_corner(counter=0,
                                     final_flag=final_flag),
                                transitions={'sucess': 'folded'})
 
+
 def convert_to_vec(msg):
     return Vector3(msg.point.x, msg.point.y, msg.point.z)
+
 
 def main():
     rospy.init_node('folding_state_machine')
