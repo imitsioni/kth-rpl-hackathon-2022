@@ -441,7 +441,6 @@ class BaxterWrapping:
         print(self.arm)
 
         # plan and execute trajectory
-        # TODO: add Matt planning
         self.move_to_point(pos)
 
         success = True
@@ -531,27 +530,31 @@ class BaxterWrapping:
         b = np.array([B.x, B.y, B.z])
         e = np.array([EE_pose.pose.position.x, EE_pose.pose.position.y, EE_pose.pose.position.z])
 
-        # Assumption that the closest point is A
-        # TODO: release the assumption
-        f = copy.deepcopy(a)
-        f[2] -= l_edge
-
         # Compute first movement EE toward closest edge (assumed to be A)
         a1 = copy.deepcopy(a)
-        a1[2] += 0.03                       # TODO: check that the height offset is correct
+        a1[2] += 0.08               # Offset on z
         a1_e = a1 - e
-        directions.append(a1_e/np.linalg.norm(a1_e))
-        distances.append(np.linalg.norm(a1_e))
+        # directions.append(a1_e/np.linalg.norm(a1_e))
+        # distances.append(np.linalg.norm(a1_e))
 
-        # compute final movement
+        # compute total translation
+        f = copy.deepcopy(a)
+        f[2] -= l_edge
         l = np.linalg.norm(e - f) - l_edge
-        # all possible directions
-        ab = b - a
+        a_b = b - a
+        a_b = a_b / np.linalg.norm(a_b) * l
 
-        # Assumption that we're moving towards corner B
-        # TODO: release this assumption
-        directions.append(ab / np.linalg.norm(ab))
-        distances.append(l)
+        # Sum of movements
+        e_b = a1_e + a_b
+
+        # Move towards b and go down
+        directions.append(e_b / np.linalg.norm(e_b))
+        distances.append(np.linalg.norm(e_b))
+
+        directions.append(np.array([0., 0., -1.]))
+        distances.append(0.03)
+
+
 
         print("Directions: ", directions)
         print("Distances: ", distances)
