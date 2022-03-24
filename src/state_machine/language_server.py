@@ -130,6 +130,12 @@ class LanguageServer:
             # synthesize_text(recognized_str)
             # time.sleep(1)
 
+    def ask_if_folding_correct(self):
+        self.say_word("Is the folding for this corner correct?")
+
+    def ask_for_folding_correction(self):
+        self.say_word("Please correct the folding of the current corner")
+
 
 def synthesize_text(text):
     """Synthesizes speech from the input string of text."""
@@ -164,5 +170,7 @@ def synthesize_text(text):
 
 if __name__ == "__main__":
     sp = LanguageServer()
-    sp.broadcast()
+    sp.ask_if_folding_correct()
+    sp.ask_for_folding_correction()
+    # sp.broadcast()
     # synthesize_text("hello")
