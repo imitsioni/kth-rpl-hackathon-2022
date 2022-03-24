@@ -13,7 +13,7 @@ import geometry_msgs.msg
 import rospy
 import tf2_ros
 # import tf2_geometry_msgs
-from geometry_msgs.msg import WrenchStamped, Pose, PoseStamped, Vector3
+from geometry_msgs.msg import WrenchStamped, Pose, PoseStamped, Vector3, Quaternion
 # from sensor_msgs.msg import JointState
 import baxter_interface
 from baxter_interface import CHECK_VERSION
@@ -39,13 +39,14 @@ from apriltag_ros.msg import AprilTagDetectionArray
 from moveit_msgs.srv import GetPositionIK, GetPositionIKRequest, GetPositionIKResponse
 
 from shape_msgs.msg import SolidPrimitive
-from math import sqrt, sin
+from math import sqrt, sin, cos
 
 # import Pyro4
 # import Pyro4.util
 # import zmq
 
 from utils import get_pose_stamped_str, copy_pose_stamped, plan_cartesian_group, plan_group
+
 
 
 class BaxterWrapping:
@@ -145,6 +146,7 @@ class BaxterWrapping:
         # Grasping points
         self.grasping_points = [np.zeros(3) for i in range(4)]
         self.detected_corner = [False for i in range(4)]
+        self.active_corner = -1000
 
 
 
@@ -346,16 +348,124 @@ class BaxterWrapping:
 
     def update_grasping_points(self, msg):
         tag_ids = [5, 9, 4, 3]
+        threshold = -0.16
         self.detected_corner = [False for i in range(4)]
         for tag in msg.detections:
             if tag.id[0] in tag_ids:
                 self.grasping_points[tag_ids.index(tag.id[0])] = self.transform_to_world(np.array([tag.pose.pose.pose.position.x,
                                                          tag.pose.pose.pose.position.y,
                                                          tag.pose.pose.pose.position.z]))
-                self.detected_corner[tag_ids.index(tag.id[0])] = True
+                if self.grasping_points[tag_ids.index(tag.id[0])][2] > threshold:
+                    self.detected_corner[tag_ids.index(tag.id[0])] = True
 
-    def check_marker_visibility(self, id):
-        return self.detected_corner[id]
+    def propose_corner(self):
+        proposed = False
+        while not proposed:
+            if (True in self.detected_corner):
+                for i, corner in enumerate(self.detected_corner):
+                    if corner:
+                        self.active_corner = i
+                        break
+                print("Corner: ", self.active_corner)
+                proposed = True
+            else:
+                print("Corner not proposed yet")
+
+    def calculate_release_orientation(self, movedir):
+        """
+            calculate the global pose of the endeffector to release the cloth
+        Args:
+            movedir: np.array([x,y,z]) place direction in global frame
+        """
+        link_name = self.arm + "_gripper"
+        world_gripper_trafo = self.tfBuffer.lookup_transform("world",  # source frame
+                                       link_name,
+                                       rospy.Time(0),
+                                       # get the tf at first available time
+                                       rospy.Duration(1.0))
+        quat = world_gripper_trafo.transform.rotation
+        rotm = quaternion_matrix([quat.x, quat.y, quat.z, quat.w])
+        rotm = rotm[0:3, 0:3]
+        # Gripper z axis in world frame
+        z_G_W = rotm.dot(np.array([0, 0, 1]))
+        z_G_W /= np.linalg.norm(z_G_W)
+
+        print("Gripper Z in world frame:")
+        print(z_G_W)
+
+
+        # desired rotation axis
+        rot_axis = np.cross(z_G_W, movedir)
+        rot_axis /= np.linalg.norm(rot_axis)
+        print("rot_axis: ")
+        print(rot_axis)
+        # angle by which we'd like to rotate
+        alpha = 20 * np.pi / 180
+
+        quat = [rot_axis[0] * sin(alpha / 2), rot_axis[1] * sin(alpha / 2), rot_axis[2] * sin(alpha / 2), cos(alpha / 2)]
+        R2 = self.quaternion_rotation_matrix(quat)
+
+        R12 = np.matmul(rotm, np.linalg.inv(R2))
+        quat12 = self.rotation_matrix_quaternion(R12)
+
+        des_orient = Quaternion()
+        des_orient.x = quat12[0]
+        des_orient.y = quat12[1]
+        des_orient.z = quat12[2]
+        des_orient.w = quat12[3]
+
+        return des_orient
+
+    def rotation_matrix_quaternion(self, R):
+        w = sqrt(1.0 + R[0, 0] + R[1, 1] + R[2, 2]) / 2.0
+        x = (R[2, 1] - R[1, 2]) / (4.0 * w)
+        y = (R[0, 2] - R[2, 0]) / (4.0 * w)
+        z = (R[1, 0] - R[0, 1]) / (4.0 * w)
+        return np.array([x, y, z, w])
+
+    def quaternion_rotation_matrix(self, Q):
+        """
+        Covert a quaternion into a full three-dimensional rotation matrix.
+
+        Input
+        :param Q: A 4 element array representing the quaternion (q0,q1,q2,q3)
+
+        Output
+        :return: A 3x3 element matrix representing the full 3D rotation matrix.
+                 This rotation matrix converts a point in the local reference
+                 frame to a point in the global reference frame.
+        """
+        # Extract the values from Q
+        q0 = Q[0]
+        q1 = Q[1]
+        q2 = Q[2]
+        q3 = Q[3]
+
+        # First row of the rotation matrix
+        r00 = 2 * (q0 * q0 + q1 * q1) - 1
+        r01 = 2 * (q1 * q2 - q0 * q3)
+        r02 = 2 * (q1 * q3 + q0 * q2)
+
+        # Second row of the rotation matrix
+        r10 = 2 * (q1 * q2 + q0 * q3)
+        r11 = 2 * (q0 * q0 + q2 * q2) - 1
+        r12 = 2 * (q2 * q3 - q0 * q1)
+
+        # Third row of the rotation matrix
+        r20 = 2 * (q1 * q3 - q0 * q2)
+        r21 = 2 * (q2 * q3 + q0 * q1)
+        r22 = 2 * (q0 * q0 + q3 * q3) - 1
+
+        # 3x3 rotation matrix
+        rot_matrix = np.array([[r00, r01, r02],
+                               [r10, r11, r12],
+                               [r20, r21, r22]])
+
+        return rot_matrix
+
+    #
+    # def check_marker_visibility(self, id):
+    #     return self.detected_corner[id]
 
     def transform_to_world(self, pos):
         quat = self.world_camera_transform.transform.rotation
@@ -437,7 +547,7 @@ class BaxterWrapping:
         pos = PoseStamped()
         pos.pose.position.x = self.grasping_points[id][0]
         pos.pose.position.y = self.grasping_points[id][1]
-        pos.pose.position.z = self.grasping_points[id][2] + 0.02
+        pos.pose.position.z = self.grasping_points[id][2] + 0.04
         pos.pose.orientation.x = 0.
         pos.pose.orientation.y = 1.
         pos.pose.orientation.z = 0.
@@ -655,7 +765,7 @@ class BaxterWrapping:
             waypoints.append(new_pose)
 
         (plan, fraction) = group.compute_cartesian_path(
-            waypoints, 0.001, 0.0, avoid_collisions=True)
+            waypoints, 0.001, 4.0, avoid_collisions=True)
 
         # OPTIONAL TODO: Check timing of trajectory
         # n_timed_traj = len(plan.joint_trajectory.points)
@@ -945,6 +1055,21 @@ def main():
 
                 print("Called IK Servcie!!!")
 
+            elif (r_str == "cur_orient"):
+                group = bwrap.get_group()
+
+                # Get EE position
+                EE_pose = group.get_current_pose()
+                o = bwrap.calculate_release_orientation(np.array([0, 1, 0]))
+                EE_pose.pose.orientation = o
+                print(o)
+                # group.set_pose_target(EE_pose.pose)
+                # group.go(wait=True)
+                # group.clear_pose_targets()
+                # time.sleep(1)
+                #
+                # group.stop()
+                # time.sleep(1)
 
 
     except rospy.ROSInterruptException:

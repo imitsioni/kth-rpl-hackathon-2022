@@ -65,13 +65,13 @@
         args="0.622 0.041 0.7 1.0 -0.0 0.0 0.0   world birdseye_camera 10" /-->
 
      <!-- Node for optoforce sensor -->
-     <node pkg="optoforce_ros_fingertip"
+<!--      <node pkg="optoforce_ros_fingertip"
         type="optoforce_publisher"
-        name="optoforce_publisher" />
+        name="optoforce_publisher" /> -->
 
-     <node pkg="optoforce_ros_fingertip"
-        type="optoforce_publisher"
-        name="optoforce_publisher2" />
+<!--      <node pkg="optoforce_ros_fingertip" -->
+<!--         type="optoforce_publisher" -->
+<!--         name="optoforce_publisher2" /> -->
 
 
 

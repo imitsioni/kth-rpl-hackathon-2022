@@ -67,8 +67,9 @@ class GraspCorner(smach.State):
         smach.State.__init__(self,
                              outcomes=['sucess'],
                              input_keys=['baxter','corner_id'])
-        self.corner_id = corner_id
+
         self.baxter = baxter
+        self.corner_id = corner_id
 
     def execute(self, userdata):
         # Ask human to start grasping
@@ -77,20 +78,22 @@ class GraspCorner(smach.State):
             start_grasp = raw_input("Start Grasping? [y]/[n]")
 
         # Verify that the corner is visible
-        rospy.loginfo('Checking Corner Visibility')
-        corner = self.corner_id
-        visible = self.baxter.check_marker_visibility(corner)
-
-        while not visible:
-            rospy.loginfo('Corner NOT Visible')
-            rospy.sleep(1)
-            visible = self.baxter.check_marker_visibility(corner)
+        # rospy.loginfo('Checking Corner Visibility')
+        # corner = self.corner_id
+        # visible = self.baxter.check_marker_visibility(corner)
+        #
+        # while not visible:
+        #     rospy.loginfo('Corner NOT Visible')
+        #     rospy.sleep(1)
+        #     visible = self.baxter.check_marker_visibility(corner)
 
         # Grasp corner
         rospy.loginfo('Executing state Grasp Corner')
         # rospy.loginfo('Counter = %f' % userdata.bar_counter_in)
+        self.baxter.propose_corner()
+        self.corner_id = self.baxter.active_corner
 
-        self.baxter.grasp(corner)  # int
+        self.baxter.grasp(self.corner_id)  # int
 
         # Human will tell "CLOSE"
         close = 'n'
@@ -162,6 +165,7 @@ class Goal(smach.State):
         rospy.loginfo('Executing state GOAL')
         # Open gripper
         self.baxter.open_gripper()
+        time.sleep(1)
         # Added upwards movement
         self.baxter.move_along_line(np.array([0., 0., 1]), 0.04)
 
@@ -248,7 +252,7 @@ def main():
     D.z = -0.14
 
     closest_corners = [A, B, C, D]
-    final_corners = [C, D, A, B]
+    final_corners = [C, D, B, A]
     edge = 0.08
 
     # Create a SMACH state machine
