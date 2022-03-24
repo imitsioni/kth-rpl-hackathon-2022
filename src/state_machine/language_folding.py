@@ -158,10 +158,11 @@ class Fold(smach.State):
 
 class Goal(smach.State):
 
-    def __init__(self, baxter, lang_server):
+    def __init__(self, baxter, lang_server, final_flag=False):
         smach.State.__init__(self, outcomes=['sucess'], input_keys=['baxter'])
         self.baxter = baxter
         self.lang_server = lang_server
+        self.final_flag = final_flag
 
     def execute(self, userdata):
         rospy.loginfo('Executing state GOAL')
@@ -173,10 +174,12 @@ class Goal(smach.State):
         self.baxter.initialize()
         # rospy.loginfo('Counter = %f' % userdata.bar_counter_in)
 
-        # Ask human whether to keep grasping
-        keep_grasping = 'n'
-        while keep_grasping != 'y':
-            keep_grasping = raw_input("Grasp Another Corner? [y]/[n]")
+        if not self.final_flag:
+            # Ask human whether to keep grasping
+            self.lang_server.ask_for_corner()
+
+        if self.final_flag:
+            self.lang_server.thanking_for_participating()
 
         return 'sucess'
 
@@ -224,7 +227,9 @@ def sub_state_machine_fold_corner(counter=0,
             transitions={'sucess': 'IdentifyCorner_' + str(counter + 1)})
     else:
         smach.StateMachine.add('Goal_' + str(counter),
-                               Goal(baxter, lang_server=lang_server),
+                               Goal(baxter,
+                                    lang_server=lang_server,
+                                    final_flag=final_flag),
                                transitions={'sucess': 'folded'})
 
 

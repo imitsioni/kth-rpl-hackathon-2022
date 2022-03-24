@@ -160,6 +160,7 @@ class LanguageServer:
             if recognized_str in self.available_answers:
                 if recognized_str == 'no':
                     self.say_word("Standing still")
+                    time.sleep(5)
                 elif recognized_str == 'close' or recognized_str == 'open':
                     self.say_word("Did I ask anything about the gripper?")
                 else:
@@ -192,24 +193,30 @@ class LanguageServer:
         return True, recognized_str
 
     def ask_for_corner(self):
-        self.say_word("Do you want me to grasp another corner?")
-        rospy.loginfo("Baxter: Can I close the gripper?")
+        self.say_word("Do you want to propose another corner?")
+        rospy.loginfo("Baxter: Grasp Another Corner?")
         while True:
             audio = self.get_audio()
             recognized_str = str(self.recognize(audio))
             rospy.loginfo('String detected: {}'.format(recognized_str))
             if recognized_str in self.available_answers:
-                if recognized_str == 'no' or recognized_str == 'open':
-                    self.say_word("Can I close the gripper now?")
+                if recognized_str == 'no':
+                    self.say_word("Standing still")
+                    time.sleep(5)
+                elif recognized_str == 'close' or recognized_str == 'open':
+                    self.say_word("Did I ask anything about the gripper?")
                 else:
-                    self.say_word("Closing the gripper")
-                    rospy.loginfo("Baxter: Closing the gripper")
+                    self.say_word("Waiting for you!")
+                    rospy.loginfo("Baxter: Waiting for you!")
                     break
 
             else:
                 self.say_word("Did not understand your answer")
                 self.list_available_answers()
         return True, recognized_str
+
+    def thanking_for_participating(self):
+        self.say_word("Thank you for participating in the folding with Baxter")
 
 
 def synthesize_text(text):
@@ -245,10 +252,13 @@ def synthesize_text(text):
 
 if __name__ == "__main__":
     sp = LanguageServer()
+    sp.say_word("How")
+    sp.say_word("are")
+    sp.say_word("you doing?")
     # sp.list_answer_options_corners()
     # sp.list_available_answers()
     # sp.ask_for_close_gripper()
-    sp.ask_for_start_grasping()
+    # sp.ask_for_start_grasping()
     # sp.ask_if_folding_correct()
     # sp.ask_for_folding_correction()
     # sp.broadcast()
