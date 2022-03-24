@@ -33,7 +33,7 @@ import pickle
 from datetime import datetime
 
 from baxter_core_msgs.msg import EndpointState
-from moveit_msgs.msg import PositionConstraint
+from moveit_msgs.msg import Constraints, OrientationConstraint
 from apriltag_ros.msg import AprilTagDetectionArray
 
 from moveit_msgs.srv import GetPositionIK, GetPositionIKRequest, GetPositionIKResponse
@@ -92,7 +92,7 @@ class BaxterWrapping:
         self.left_group.set_planning_time(10)
         self.left_group.set_num_planning_attempts(5)
         self.left_group.set_start_state_to_current_state()
-        self.left_group.set_goal_orientation_tolerance(0.1)
+        self.left_group.set_goal_orientation_tolerance(0.2)
 
         # moveit interface right arm
         self.right_group = moveit_commander.MoveGroupCommander('right_arm')
@@ -100,7 +100,27 @@ class BaxterWrapping:
         self.right_group.set_planning_time(2)
         self.right_group.set_num_planning_attempts(5)
         self.right_group.set_start_state_to_current_state()
-        self.right_group.set_goal_orientation_tolerance(0.1)
+        self.right_group.set_goal_orientation_tolerance(0.2)
+
+        ## Orientation constraints
+        # c = Constraints()
+        # EE_orientation_constraint = OrientationConstraint()
+        # EE_orientation_constraint.header.frame_id = "world"
+        # EE_orientation_constraint.link_name = "left_gripper"
+        # EE_orientation_constraint.orientation.x = 0.
+        # EE_orientation_constraint.orientation.y = 1.
+        # EE_orientation_constraint.orientation.z = 0.
+        # EE_orientation_constraint.orientation.w = 0.0
+        # EE_orientation_constraint.absolute_x_axis_tolerance = 0.2
+        # EE_orientation_constraint.absolute_y_axis_tolerance = 0.2
+        # EE_orientation_constraint.absolute_z_axis_tolerance = 3
+        # EE_orientation_constraint.weight = 1
+        # c.orientation_constraints = [EE_orientation_constraint]
+        #
+        # self.left_group.set_path_constraints(c)
+        # cr = copy.deepcopy(c)
+        # cr.orientation_constraints[0].link_name = "right_gripper"
+        # self.right_group.set_path_constraints(cr)
         ########### variables
 
         # Optoforce sensor variables
@@ -445,12 +465,14 @@ class BaxterWrapping:
         print(self.opto_forces_right)
         print(self.interrupt_movement_right)
         # Keep moving while force threshold not surpassed
-        while not (self.interrupt_movement_right or self.interrupt_movement_left) and count < 10:           # TODO: define better safe stopping condition
+        pull = True
+        while pull:           # TODO: define better safe stopping condition
             self.move_along_line(direction, distance)
             print(self.opto_forces_right)
             print(self.interrupt_movement_right)
             count += 1
             print(count)
+            pull = not (self.interrupt_movement_right or self.interrupt_movement_left) and count < 10
 
         # TODO: code success
         success = True
@@ -651,6 +673,7 @@ class BaxterWrapping:
         self.arm_selection(point.pose.position.y)
         group = self.get_group()
 
+
         # Done with right group, must be choosen a new one
         init_pose = group.get_current_pose()
         # point.pose.orientation = init_pose.pose.orientation
@@ -828,9 +851,7 @@ def main():
                 pD.x = 0.58
                 pD.y = 0.
                 pD.z = -0.14
-                pB = Vector3()
-                pC = Vector3()
-                bwrap.place(pA, pD, pC, pB, 0.08)
+                bwrap.place(pA, pD, 0.08)
 
             elif (r_str == "place2"):
                 pA = Vector3()
@@ -841,9 +862,7 @@ def main():
                 pD.x = 0.72
                 pD.y = -0.17
                 pD.z = -0.14
-                pB = Vector3()
-                pC = Vector3()
-                bwrap.place(pA, pD, pC, pB, 0.08)
+                bwrap.place(pA, pD, 0.08)
 
             elif (r_str == "place3"):
                 pA = Vector3()
@@ -854,9 +873,7 @@ def main():
                 pD.x = 0.825
                 pD.y = -0.05
                 pD.z = -0.14
-                pB = Vector3()
-                pC = Vector3()
-                bwrap.place(pA, pD, pC, pB, 0.08)
+                bwrap.place(pA, pD, 0.08)
 
             elif (r_str == "place4"):
                 pA = Vector3()
@@ -867,13 +884,11 @@ def main():
                 pD.x = 0.73
                 pD.y = 0.11
                 pD.z = -0.14
-                pB = Vector3()
-                pC = Vector3()
-                bwrap.place(pA, pD, pC, pB, 0.08)
+                bwrap.place(pA, pD, 0.08)
 
             elif (r_str == "movedir"):
-                direction = np.array([0.,0.,-12.])
-                bwrap.move_along_line(direction, 0.1)
+                direction = np.array([0.,0.,1])
+                bwrap.move_along_line(direction, 0.03)
 
             elif (r_str == "movepr"):
                 p = PoseStamped()

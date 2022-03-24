@@ -5,6 +5,7 @@ import rospy
 import smach
 import smach_ros
 import time
+import numpy as np
 
 ## Planning imports
 from wrapping import BaxterWrapping
@@ -142,6 +143,9 @@ class Goal(smach.State):
         rospy.loginfo('Executing state GOAL')
         # Open gripper
         self.baxter.open_gripper()
+        # Added upwards movement
+        self.baxter.move_along_line(np.array([0., 0., 1]), 0.04)
+
         self.baxter.initialize()
         # rospy.loginfo('Counter = %f' % userdata.bar_counter_in)
         return 'sucess'
