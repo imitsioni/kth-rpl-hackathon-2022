@@ -6,6 +6,8 @@ import smach
 import smach_ros
 import time
 
+from language_server import LanguageServer
+
 
 # Defines start node to get all info
 class Start(smach.State):
@@ -143,6 +145,7 @@ def main():
     sm_top.userdata.sm_counter = 0
     sm_top.userdata.corner_id = 0
     # sm.userdata.corner_positon
+    lang_server = LanguageServer()
 
     # Open the container
     counter_fold = 0

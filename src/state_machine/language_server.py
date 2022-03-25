@@ -12,6 +12,8 @@ import rospy
 
 from playsound import playsound
 
+from threading import Lock, Thread
+
 
 class LanguageServer:
 
@@ -32,6 +34,17 @@ class LanguageServer:
             'bottom left', 'bottom right', ' top left', ' top right'
         ]
         self.available_answers = ['yes', 'no', 'close', 'open']
+
+        self.stopping_thread = Thread(target=self.stop_thread).start()
+
+    def stop_thread(self):
+        while True:
+            audio = self.get_audio()
+            recognized_str = str(self.recognize(audio))
+            if 'stop' in recognized_str:
+                self.playsound(self.voice_path + '/' + 'shut_down.mp3')
+                rospy.signal_shutdown("stopped by user")
+                break
 
         # self.behaviours = {
         #     "movie": self.process_movie,
@@ -209,8 +222,7 @@ class LanguageServer:
             rospy.loginfo('String detected: {}'.format(recognized_str))
             if 'yes' in recognized_str:
                 #self.say_word("Closing the gripper")
-                self.playsound(self.voice_path + '/' +
-                               'closing_gripper.mp3')
+                self.playsound(self.voice_path + '/' + 'closing_gripper.mp3')
                 rospy.loginfo("Baxter: Closing the gripper")
                 break
 
@@ -316,10 +328,10 @@ if __name__ == "__main__":
     # sp.ask_for_start_grasping()
     # sp.ask_if_folding_correct()
     # sp.ask_for_folding_correction()
-    # sp.broadcast()
-    sp.say_word("How")
-    sp.say_word("are")
-    sp.say_word("you doing?")
+    sp.broadcast()
+    # sp.say_word("How")
+    # sp.say_word("are")
+    # sp.say_word("you doing?")
     # sp.list_answer_options_corners()
     # sp.list_available_answers()
     # sp.ask_for_close_gripper()
