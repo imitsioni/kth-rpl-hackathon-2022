@@ -172,6 +172,11 @@ class Goal(smach.State):
             self.lang_server.ask_for_corner()
 
         if self.final_flag:
+            if self.lang_server.patrick:
+                self.lang_server.thank_you_patrick()
+            if self.lang_server.chris:
+                self.lang_server.thank_you_chris()
+
             self.lang_server.thanking_for_participating()
             self.land_server.stop = True
 

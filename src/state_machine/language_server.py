@@ -23,7 +23,12 @@ class LanguageServer:
                  file_path='mic_config.json',
                  folder_path='Salli',
                  folder_path_kid='Ivy',
-                 flag_kid_voice=True):
+                 flag_kid_voice=True,
+                 patrick=False,
+                 chris=False):
+        self.stop = False
+        self.chris = chris
+        self.patrick = patrick
         self.file_path = file_path
         self.config = self._load_config()
         self.playsound = playsound
@@ -38,7 +43,6 @@ class LanguageServer:
         self.available_answers = ['yes', 'no', 'close', 'open']
 
         self.stopping_thread = Thread(target=self.stop_thread).start()
-        self.stop = False
 
     def stop_thread(self):
         while not self.stop:
@@ -295,6 +299,12 @@ class LanguageServer:
                                'did_not_understand_answer.mp3')
                 self.list_available_answers()
         return True, recognized_str
+
+    def thank_you_chris(self):
+        self.playsound(self.voice_path + '/' + 'chris.mp3')
+
+    def thank_you_patrick(self):
+        self.playsound(self.voice_path + '/' + 'patrick.mp3')
 
     def thanking_for_participating(self):
         #self.say_word("Thank you for participating in the folding with Baxter")
