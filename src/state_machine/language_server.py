@@ -9,6 +9,7 @@ import speech_recognition as sr
 from future.moves.urllib.request import urlopen, Request
 import pyttsx3
 import rospy
+import sys
 
 from playsound import playsound
 
@@ -45,6 +46,7 @@ class LanguageServer:
             if 'stop' in recognized_str:
                 self.playsound(self.voice_path + '/' + 'shut_down.mp3')
                 rospy.signal_shutdown("stopped by user")
+                sys.exit()
                 break
 
         # self.behaviours = {
