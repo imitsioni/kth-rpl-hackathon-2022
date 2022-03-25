@@ -1,3 +1,4 @@
+from cmath import sqrt
 import open3d as o3d
 import numpy as np
 import matplotlib.pyplot as plt
@@ -223,6 +224,22 @@ def get_width_length_height(pcd, max_plane_idx=2, view=False) -> [np.array, np.a
     box_points = segments[box_index]
 
     new_lenght_1, new_lenght_2, new_top_surface_corners, new_center = get_surface_size_from_pcd(pcd=box_points)
+
+    # if the the minist two points x smaller than 0.05, do the rotation find the corner, and find the corner again
+    x_increasing = np.argsort(new_top_surface_corners[:,0])
+    x_increasing_top_corners = new_top_surface_corners[x_increasing]
+    y_increasing = np.argsort(new_top_surface_corners[:,1])
+    y_increasing_top_corners = new_top_surface_corners[y_increasing]
+    # print(x_increasing_top_corners[1,0] - x_increasing_top_corners[0,0], y_increasing_top_corners[1,1]- y_increasing_top_corners[0,1])
+    if x_increasing_top_corners[1,0] - x_increasing_top_corners[0,0]< 0.05 or y_increasing_top_corners[1,1]- y_increasing_top_corners[0,1] < 0.05:
+        # rotate 45 degree with z axis
+        Rot = np.array([[1.0/sqrt(2), -1.0/sqrt(2), 0],
+                        [1.0/sqrt(2), 1.0/sqrt(2), 0],
+                        [0,0,1]])
+        rotated_points = np.matmul(Rot, np.asarray(box_points.points).T).T
+        new_lenght_1, new_lenght_2, new_top_surface_corners, _ = get_surface_size_from_pcd(pcd = init_pointcloud(rotated_points))
+        new_top_surface_corners = np.matmul(np.linalg.inv(Rot), new_top_surface_corners.T).T
+
     new_height = get_plane_distance(point=new_center, plane=table_plane)
     # # --------------------------------------------------------------------
     # ## obtain geometry information from box points

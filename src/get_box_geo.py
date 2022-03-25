@@ -78,7 +78,16 @@ class box_geometry:
         self.buffer_box_geometry.append(geometry)
         self.buffer_center.append(center)
         self.buffer_surface.append(top_surface_corners)
+        
+        # keep the buffer size <= 20
+        if len(self.buffer_box_geometry) == 21:
+            self.buffer_box_geometry.pop(0)
+            self.buffer_center.pop(0)
+            self.buffer_surface.pop(0)
+
         assert len(self.buffer_box_geometry) == len(self.buffer_center) ==  len(self.buffer_surface)
+        
+        # only publish the topic when the buffer saves 20 timestamps
         if len(self.buffer_box_geometry) == 20: # TODO: set the seq_length
             buffer_box_geometry_numpy = np.array(self.buffer_box_geometry)
             buffer_center_numpy = np.array(self.buffer_center)
@@ -89,7 +98,7 @@ class box_geometry:
             top_surface_corners = np.median(buffer_surface_numpy, axis=0)
 
             # bbox.pose.position.x, bbox.pose.position.y, bbox.pose.position.z = center[0], center[1], center[2]
-            center_world = self.transform_to_world(center) # TODO: transform the box center to the world frame
+            center_world = self.transform_to_world(center) # transform the box center to the world frame
             bbox.pose.position.x, bbox.pose.position.y, bbox.pose.position.z = center_world[0], center_world[1], center_world[2]
             bbox.extents.x, bbox.extents.y, bbox.extents.z = geometry[0]+0.01, geometry[1]+0.01, geometry[2]
 
@@ -135,13 +144,9 @@ class box_geometry:
             self.pub_corner2_world.publish(cor2_world)
             self.pub_corner3_world.publish(cor3_world)
 
-            rospy.loginfo(geometry)
+            rospy.loginfo([bbox.extents.x, bbox.extents.y, bbox.extents.z])
             # rospy.loginfo(top_surface_corners)
 
-            # buffer # TODO: every time publish, clean the buffer
-            self.buffer_surface = []
-            self.buffer_box_geometry = []
-            self.buffer_center = []
 
 if __name__ == '__main__':
     box_geometry()
