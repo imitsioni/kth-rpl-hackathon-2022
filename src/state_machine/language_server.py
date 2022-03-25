@@ -14,6 +14,7 @@ import sys
 from playsound import playsound
 
 from threading import Lock, Thread
+import os
 
 
 class LanguageServer:
@@ -46,7 +47,15 @@ class LanguageServer:
             if 'stop' in recognized_str:
                 self.playsound(self.voice_path + '/' + 'shut_down.mp3')
                 rospy.signal_shutdown("stopped by user")
-                sys.exit()
+                import subprocess
+                subprocess = subprocess.Popen(['ps', '-A'],
+                                              stdout=subprocess.PIPE)
+                output, error = subprocess.communicate()
+                target_process = "python"
+                for line in output.splitlines():
+                    if target_process in str(line):
+                        pid = int(line.split(None, 1)[0])
+                        os.kill(pid, 9)
                 break
 
         # self.behaviours = {
