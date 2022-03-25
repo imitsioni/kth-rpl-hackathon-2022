@@ -173,6 +173,7 @@ class Goal(smach.State):
 
         if self.final_flag:
             self.lang_server.thanking_for_participating()
+            self.land_server.stop = True
 
         return 'sucess'
 

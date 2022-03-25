@@ -36,9 +36,10 @@ class LanguageServer:
         self.available_answers = ['yes', 'no', 'close', 'open']
 
         self.stopping_thread = Thread(target=self.stop_thread).start()
+        self.stop = False
 
     def stop_thread(self):
-        while True:
+        while not self.stop:
             audio = self.get_audio()
             recognized_str = str(self.recognize(audio))
             if 'stop' in recognized_str:
@@ -113,7 +114,7 @@ class LanguageServer:
 
     def get_audio(self):
         with sr.WavFile(urlopen(self.asocket)) as source:
-            print("Say something!")
+            # print("Say something!")
             # self.r.adjust_for_ambient_noise(source, duration=1)
             audio = self.r.listen(source, phrase_time_limit=3)
         return audio
