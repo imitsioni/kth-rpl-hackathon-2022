@@ -25,7 +25,9 @@ class LanguageServer:
                  folder_path_kid='Ivy',
                  flag_kid_voice=True,
                  patrick=False,
-                 chris=False):
+                 chris=False,
+                 pid=None):
+        self.pid = pid
         self.stop = False
         self.chris = chris
         self.patrick = patrick
@@ -51,15 +53,12 @@ class LanguageServer:
             if 'stop' in recognized_str:
                 self.playsound(self.voice_path + '/' + 'shut_down.mp3')
                 rospy.signal_shutdown("stopped by user")
-                import subprocess
-                subprocess = subprocess.Popen(['ps', '-A'],
-                                              stdout=subprocess.PIPE)
-                output, error = subprocess.communicate()
-                target_process = "python"
-                for line in output.splitlines():
-                    if target_process in str(line):
-                        pid = int(line.split(None, 1)[0])
-                        os.kill(pid, 9)
+                import psutil
+                # PROCNAME = "language_folding.py"
+                for proc in psutil.process_iter():
+                    # check whether the process name matches
+                    if proc.pid() == self.pid:
+                        proc.kill()
                 break
 
         # self.behaviours = {

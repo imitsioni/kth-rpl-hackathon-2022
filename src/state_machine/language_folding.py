@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
+from fcntl import F_SEAL_SEAL
 import rospy
 import smach
 import smach_ros
 import time
 import numpy as np
+import os
 
 ## Planning imports
 from wrapping import BaxterWrapping
@@ -238,7 +240,7 @@ def convert_to_vec(msg):
 
 def main():
     rospy.init_node('folding_state_machine')
-    lang_server = LanguageServer()
+    lang_server = LanguageServer(pid=os.getpid(), chris=False, patrick=False)
 
     # remap again
     joint_state_topic = ['joint_states:=/robot/joint_states']
