@@ -230,8 +230,12 @@ def get_width_length_height(pcd, max_plane_idx=2, view=False) -> [np.array, np.a
     x_increasing_top_corners = new_top_surface_corners[x_increasing]
     y_increasing = np.argsort(new_top_surface_corners[:,1])
     y_increasing_top_corners = new_top_surface_corners[y_increasing]
+    x_ratio = (x_increasing_top_corners[1,0] - x_increasing_top_corners[0,0])/ new_lenght_1
+    y_ratio = (y_increasing_top_corners[1,1]- y_increasing_top_corners[0,1])/new_lenght_2
+    # print(x_ratio, y_ratio)
     # print(x_increasing_top_corners[1,0] - x_increasing_top_corners[0,0], y_increasing_top_corners[1,1]- y_increasing_top_corners[0,1])
-    if x_increasing_top_corners[1,0] - x_increasing_top_corners[0,0]< 0.05 or y_increasing_top_corners[1,1]- y_increasing_top_corners[0,1] < 0.05:
+    # if x_increasing_top_corners[1,0] - x_increasing_top_corners[0,0]< 0.05 or y_increasing_top_corners[1,1]- y_increasing_top_corners[0,1] < 0.05:
+    if x_ratio < 0.25 or y_ratio < 0.25:
         # rotate 45 degree with z axis
         Rot = np.array([[1.0/sqrt(2), -1.0/sqrt(2), 0],
                         [1.0/sqrt(2), 1.0/sqrt(2), 0],
