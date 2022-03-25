@@ -207,7 +207,7 @@ class LanguageServer:
             else:
                 #self.say_word("Did not understand your answer")
                 self.playsound(self.voice_path + '/' +
-                               'did_not_understand_answer')
+                               'did_not_understand_answer.mp3')
                 self.list_available_answers()
         return True, recognized_str
 
@@ -242,7 +242,7 @@ class LanguageServer:
             else:
                 #self.say_word("Did not understand your answer")
                 self.playsound(self.voice_path + '/' +
-                               'did_not_understand_answer')
+                               'did_not_understand_answer.mp3')
                 self.list_available_answers()
         return True, recognized_str
 
@@ -269,7 +269,7 @@ class LanguageServer:
                 elif recognized_str == 'close' or recognized_str == 'open':
                     #self.say_word("Did I ask anything about the gripper?")
                     self.playsound(self.voice_path + '/' +
-                                   'did_not_understand_answer')
+                                   'did_not_understand_answer.mp3')
                 else:
                     #self.say_word("Please propose a corner")
                     self.playsound(self.voice_path + '/' + 'please_corner.mp3')
@@ -280,7 +280,7 @@ class LanguageServer:
             else:
                 #self.say_word("Did not understand your answer")
                 self.playsound(self.voice_path + '/' +
-                               'did_not_understand_answer')
+                               'did_not_understand_answer.mp3')
                 self.list_available_answers()
         return True, recognized_str
 
