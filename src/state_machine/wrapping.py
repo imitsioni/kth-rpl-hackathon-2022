@@ -39,7 +39,7 @@ from apriltag_ros.msg import AprilTagDetectionArray
 from moveit_msgs.srv import GetPositionIK, GetPositionIKRequest, GetPositionIKResponse
 
 from shape_msgs.msg import SolidPrimitive
-from math import sqrt, sin, cos
+from math import sqrt, sin, cos, asin
 
 # import Pyro4
 # import Pyro4.util
@@ -127,13 +127,13 @@ class BaxterWrapping:
         # Optoforce sensor variables
         self.opto_calibrated_right = False            # This variable is needed to remove the initial offset of the sensor
         self.opto_offsets_right = np.zeros(3)         # Offset for y,z axis
-        self.opto_thresholds_right = np.asarray([5, 5])
+        self.opto_thresholds_right = np.asarray([20, 20])
         self.opto_forces_right = np.zeros(3)
 
 
         self.opto_calibrated_left = False  # This variable is needed to remove the initial offset of the sensor
         self.opto_offsets_left = np.zeros(3)  # Offset for y,z axis
-        self.opto_thresholds_left = np.asarray([5, 5])
+        self.opto_thresholds_left = np.asarray([20, 20])
         self.opto_forces_left = np.zeros(3)
 
 
@@ -565,7 +565,10 @@ class BaxterWrapping:
             print(self.interrupt_movement_right)
             count += 1
             print(count)
-            pull = not (self.interrupt_movement_right or self.interrupt_movement_left) and count < 10
+            if self.arm == 'right':
+                pull = not self.interrupt_movement_right and count < 15
+            else:
+                pull = not self.interrupt_movement_left and count < 15
 
         # TODO: code success
         success = True
@@ -588,7 +591,8 @@ class BaxterWrapping:
         # Get EE position
         EE_pose = group.get_current_pose()
         # plan movements
-        directions, distances = self.get_waypoints(A, B, EE_pose, l_edge)
+        # directions, distances = self.get_waypoints(A, B, EE_pose, l_edge)
+        directions, distances = self.alternative_waypoints(A, B, EE_pose, l_edge, 0.06)
 
         # move towards the closest corner
         self.move_along_line(directions[0], distances[0])
@@ -662,6 +666,37 @@ class BaxterWrapping:
         print("Distances: ", distances)
         return directions, distances
 
+    def alternative_waypoints(self, A, B, EE_pos, l_edge, h):
+
+        A = np.array([A.x, A.y, A.z])
+        B = np.array([B.x, B.y, B.z])
+        EE_pos = np.array([EE_pos.pose.position.x, EE_pos.pose.position.y, EE_pos.pose.position.z])
+
+        # distance to corner estimated from stretch
+        d_s = np.linalg.norm(EE_pos - (A - np.array([0., 0., l_edge])))
+
+        # resulting radius around corner
+        r = d_s - l_edge
+
+        # place direction
+        d_p = (B - A) / np.linalg.norm(B - A)
+
+        # Goal point projected on box
+        G_b = A + cos(asin(h / r)) * r * d_p
+
+        # Goal point in global frame
+        G = G_b + np.array([0., 0., h])
+
+        directions = []
+        distances = []
+
+        directions.append((G - EE_pos) / np.linalg.norm(G - EE_pos))
+        distances.append(np.linalg.norm(G - EE_pos))
+
+        directions.append(np.array([0., 0., -1.]))
+        distances.append(0.03)
+
+        return directions, distances
 
     def arm_selection(self, grasp_y_position):    # TODO: to be tested
         """ Functions that decide which arm to use for the ongoing execution

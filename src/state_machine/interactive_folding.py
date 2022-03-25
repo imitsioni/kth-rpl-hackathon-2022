@@ -145,7 +145,7 @@ class Fold(smach.State):
         rospy.loginfo('Executing state Fold')
         time.sleep(0.5)
         # Place
-        corner = self.corner_id
+        corner = self.baxter.active_corner
         edge = self.edge
 
         self.baxter.place(self.closest_corners[corner], self.final_corners[corner], edge)  # Vector3, Vector3, float
@@ -235,7 +235,7 @@ def main():
     baxter.open_right_gripper()
 
     # Get Box estimations from vision
-
+    #
     corner0_msg = rospy.wait_for_message('/bbox_world/corner1', PointStamped)
     A = convert_to_vec(corner0_msg)
 
@@ -250,25 +250,25 @@ def main():
 
     # # Get Box estimations from vision
     # A = Vector3()
-    # A.x = 0.872
+    # A.x = 0.825
     # A.y = -0.05
-    # A.z = -0.134
+    # A.z = -0.14
     #
     # B = Vector3()
     # B.x = 0.73
-    # B.y = 0.09
+    # B.y = 0.11
     # B.z = -0.14
     #
+    # D = Vector3()
+    # D.x = 0.58
+    # D.y = 0.
+    # D.z = -0.14
+    #
     # C = Vector3()
-    # C.x = 0.58
-    # C.y = 0.
+    # C.x = 0.72
+    # C.y = -0.17
     # C.z = -0.14
     #
-    # D = Vector3()
-    # D.x = 0.6
-    # D.y = -0.001
-    # D.z = -0.14
-    # #
     print(A)
     print(B)
     print(C)
@@ -276,9 +276,9 @@ def main():
     closest_corners = [A, B, C, D]
     final_corners = [D, C, B, A]
 
-    edge_msg = rospy.wait_for_message('/bbox/geometry', OrientedBoundingBox)
-    # edge = 0.08
-    edge = edge_msg.extents.z
+    # edge_msg = rospy.wait_for_message('/bbox/geometry', OrientedBoundingBox)
+    edge = 0.08
+    # edge = edge_msg.extents.z
     print(edge)
 
     # Create a SMACH state machine
