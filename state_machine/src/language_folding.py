@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from fcntl import F_SEAL_SEAL
+from xmlrpc.client import boolean
 import rospy
 import smach
 import smach_ros
@@ -27,6 +28,16 @@ class Start(smach.State):
                  outcomes=['sucess'],
                  input_keys=['foo_counter_in'],
                  output_keys=['foo_counter_out']):
+        """Initialization node, just defaults to a sub state folding machine.
+
+        Args:
+            outcomes (list, optional): possible outcomes. 
+            Defaults to ['sucess'].
+            input_keys (list, optional): input keys to interact. 
+            Defaults to ['foo_counter_in'].
+            output_keys (list, optional): output keys to be interacted by other
+             nodes. Defaults to ['foo_counter_out'].
+        """
         smach.State.__init__(self,
                              outcomes=outcomes,
                              input_keys=['foo_counter_in'],
@@ -41,11 +52,25 @@ class Start(smach.State):
 class IdentifyCorner(smach.State):
 
     def __init__(self,
+                 baxter: object,
+                 lang_server: object,
                  outcomes=['sucess'],
                  input_keys=['baxter'],
-                 output_keys=['foo_counter_out'],
-                 baxter=None,
-                 lang_server=None):
+                 output_keys=['foo_counter_out']):
+        """Node on the state machine to identify a corner
+
+        Args:
+            baxter (object): Baxter object created on wrapping.py
+            lang_server (object): LanguageServer object from language_server.py
+            outcomes (list, optional): possible outcomes. 
+            Defaults to ['sucess'].
+            input_keys (list, optional): input keys to interact. 
+            Defaults to ['baxter'].
+            output_keys (list, optional): output keys to be interacted by other
+             nodes. 
+            Defaults to ['foo_counter_out'].
+        """
+
         self.baxter = baxter
         self.lang_server = lang_server
         smach.State.__init__(self,
@@ -68,7 +93,15 @@ class IdentifyCorner(smach.State):
 # define state Bar
 class GraspCorner(smach.State):
 
-    def __init__(self, baxter=None, corner_id=None, lang_server=None):
+    def __init__(self, baxter: object, corner_id: int, lang_server: object):
+        """Stretch node, is the last node of the sub state machine sequence
+
+        Args:
+            baxter (object): Baxter object created on wrapping.py
+            lang_server (object): LanguageServer object from language_server.py
+            corner_id (int): integer for the corner_id from (0,1,2,3)
+        """
+
         smach.State.__init__(self,
                              outcomes=['sucess'],
                              input_keys=['baxter', 'corner_id'])
@@ -101,7 +134,15 @@ class GraspCorner(smach.State):
 # define state Bar
 class Stretch(smach.State):
 
-    def __init__(self, baxter, lang_server=None):
+    def __init__(self, baxter: object, lang_server: object):
+        """Stretch node, is the last node of the sub state machine sequence
+
+        Args:
+            baxter (object): Baxter object created on wrapping.py
+            lang_server (object): LanguageServer object from language_server.py
+            final_flag (bool): Boolean for to signal if it is the final fold
+        """
+
         smach.State.__init__(self, outcomes=['sucess'], input_keys=['baxter'])
         self.baxter = baxter
         self.lang_server = lang_server
@@ -120,8 +161,23 @@ class Stretch(smach.State):
 
 class Fold(smach.State):
 
-    def __init__(self, baxter, corner_id, edge, closest_corners, final_corners,
-                 lang_server):
+    def __init__(self, counter: int, baxter: object, edge: float,
+                 final_corners: PointStamped, closest_corners: PointStamped,
+                 corner_id: int, lang_server: object):
+        """Creates the Fold node which is connected to a Goal node. Performs,
+        the folding of the cloth.
+        Args:
+            counter (int): Counter of the corner loop of the state machine
+            baxter (object): Baxter object created on wrapping.py
+            edge (float): float describing the size of the edge of the box
+            final_corners (PointStamped): ROS message to give coordinates about
+            the final corner to fold
+            closest_corners (PointStamped): ROS message giving the cordinates 
+            of the closest corner
+            corner_id (int): integer for the corner_id from (0,1,2,3)
+            lang_server (object): LanguageServer object from language_server.py
+        """
+
         smach.State.__init__(self,
                              outcomes=['sucess'],
                              input_keys=[
@@ -153,7 +209,14 @@ class Fold(smach.State):
 
 class Goal(smach.State):
 
-    def __init__(self, baxter, lang_server, final_flag=False):
+    def __init__(self, baxter: object, lang_server: object, final_flag: bool):
+        """Goal node, is the last node of the sub state machine sequence
+
+        Args:
+            baxter (object): Baxter object created on wrapping.py
+            lang_server (object): LanguageServer object from language_server.py
+            final_flag (bool): Boolean for to signal if it is the final fold
+        """
         smach.State.__init__(self, outcomes=['sucess'], input_keys=['baxter'])
         self.baxter = baxter
         self.lang_server = lang_server
@@ -185,14 +248,26 @@ class Goal(smach.State):
         return 'sucess'
 
 
-def sub_state_machine_fold_corner(counter=0,
-                                  final_flag=False,
-                                  baxter=None,
-                                  edge=None,
-                                  final_corners=None,
-                                  closest_corners=None,
-                                  corner_id=None,
-                                  lang_server=None):
+def sub_state_machine_fold_corner(counter: int, final_flag: bool,
+                                  baxter: object, edge: float,
+                                  final_corners: PointStamped,
+                                  closest_corners: PointStamped,
+                                  corner_id: int, lang_server: object):
+    """Creates a sub state machine for each of the foldings, since it is a 
+    repeated task depending on the number of corners.
+    Args:
+        counter (int): Counter of the corner loop of the state machine
+        final_flag (bool): Boolean for to signal if it is the final fold
+        baxter (object): Baxter object created on wrapping.py
+        edge (float): float describing the size of the edge of the box
+        final_corners (PointStamped): ROS message to give coordinates about
+        the final corner to fold
+        closest_corners (PointStamped): ROS message giving the cordinates of 
+        the closest corner.
+        corner_id (int): integer for the corner_id from (0,1,2,3)
+        lang_server (object): LanguageServer object from language_server.py
+    """
+
     smach.StateMachine.add(
         'IdentifyCorner_' + str(counter),
         IdentifyCorner(baxter=baxter, lang_server=lang_server),
@@ -249,6 +324,7 @@ def main():
     # init class obj
     baxter = BaxterWrapping()
     time.sleep(5)
+
     ############### INITIALIZATION ##############
     # Initialize right and left arm
     baxter.rabp_go_base_pose()
@@ -267,32 +343,7 @@ def main():
 
     corner3_msg = rospy.wait_for_message('/bbox_world/corner3', PointStamped)
     D = convert_to_vec(corner3_msg)
-    #
-    # # Get Box estimations from vision
-    # A = Vector3()
-    # A.x = 0.872
-    # A.y = -0.05
-    # A.z = -0.134
-    #
-    # B = Vector3()
-    # B.x = 0.73
-    # B.y = 0.09
-    # B.z = -0.14
-    #
-    # C = Vector3()
-    # C.x = 0.58
-    # C.y = 0.
-    # C.z = -0.14
-    #
-    # D = Vector3()
-    # D.x = 0.6
-    # D.y = -0.001
-    # D.z = -0.14
 
-    print(A)
-    print(B)
-    print(C)
-    print(D)
     closest_corners = [A, B, C, D]
     final_corners = [D, C, B, A]
 

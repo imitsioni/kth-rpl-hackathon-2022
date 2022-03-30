@@ -47,6 +47,10 @@ class LanguageServer:
         self.stopping_thread = Thread(target=self.stop_thread).start()
 
     def stop_thread(self):
+        """Creates a runnig threads for the Baxter state machine in terms of 
+        safety. Whenever the user or anyone says "stop" the main program is 
+        stopped.
+        """
         while not self.stop:
             audio = self.get_audio()
             recognized_str = str(self.recognize(audio))
@@ -62,6 +66,14 @@ class LanguageServer:
                 break
 
     def _load_network_properties(self):
+        """
+        Loads the properties of the networkm namely an object to convert 
+        text to speech and an audio socket address.
+
+        Returns:
+            recognizer (object), audio_socket (str): Recognizer, API from 
+            google, and an address to an audio socket.
+        """
         audio_socket = 'http://' + self.config["Audio_IP"] + ':' + self.config[
             "audio_port"] + '/audio.wav'
         recognizer = sr.Recognizer()
@@ -69,23 +81,24 @@ class LanguageServer:
         return recognizer, audio_socket
 
     def _load_config(self):
-        # Load configuration
+        """_summary_
+
+        Returns:
+            config (dict): a dictionary containing the IP and the port of the 
+            microphone
+        """        # Load configuration
         with open(self.file_path) as f:
             config = json.load(f)
         print(config)
         return config
 
-    def process_speech(self):
-        recognized_word = self.get_mic_input()
-        self.movie = recognized_word
-        print("SERVER: word is {}".format(self.movie))
-
-    def process_review(self):
-        recognized_str = self.get_mic_input()
-        self.sentiment = recognized_str
-        print("SERVER: user feedback is {}".format(self.sentiment))
-
     def get_mic_input(self):
+        """
+        Uses the API from google to convert speech to text
+
+        Returns:
+            recognized_str (str): the converted speech to text
+        """
         recognized_str = 'None'
         while recognized_str == 'None':
             audio = self.get_audio()
@@ -95,6 +108,12 @@ class LanguageServer:
         return recognized_str
 
     def get_audio(self):
+        """Uses the socket address to listen to the socket for a 
+        Wav information.
+
+        Returns:
+            audio (bits): bit information from an wav file listened from a port
+        """
         with sr.WavFile(urlopen(self.asocket)) as source:
             # print("Say something!")
             # self.r.adjust_for_ambient_noise(source, duration=1)
@@ -282,21 +301,4 @@ def synthesize_text(text):
 
 if __name__ == "__main__":
     sp = LanguageServer()
-    # sp.say_word("How")
-    # sp.say_word("are")
-    # sp.say_word("you doing?")LanguageServer
-    # sp.ask_for_start_grasping()
-    # sp.ask_if_folding_correct()
-    # sp.ask_for_folding_correction()
     sp.broadcast()
-    # sp.say_word("How")
-    # sp.say_word("are")
-    # sp.say_word("you doing?")
-    # sp.list_answer_options_corners()
-    # sp.list_available_answers()
-    # sp.ask_for_close_gripper()
-    # sp.ask_for_start_grasping()
-    # sp.ask_if_folding_correct()
-    # sp.ask_for_folding_correction()
-    #sp.broadcast()
-    # synthesize_text("hello")
