@@ -1,4 +1,4 @@
-# kth-rpl-hackathon-2022
+# kth-rpl-hackathon-2022 State Machine
 Repository hosting the code for the 2022 Robotics, Perception and Learning hackathon
 
 ## installation
