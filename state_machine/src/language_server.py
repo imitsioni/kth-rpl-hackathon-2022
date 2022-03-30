@@ -61,14 +61,6 @@ class LanguageServer:
                         proc.kill()
                 break
 
-        # self.behaviours = {
-        #     "movie": self.process_movie,
-        #     "repeat_review": self.process_repeat_review,
-        #     "sentiment": self.process_sentiment,
-        #     "choose": self.process_choice,
-        #     "opinion": self.process_opinion
-        # }
-
     def _load_network_properties(self):
         audio_socket = 'http://' + self.config["Audio_IP"] + ':' + self.config[
             "audio_port"] + '/audio.wav'
@@ -92,30 +84,6 @@ class LanguageServer:
         recognized_str = self.get_mic_input()
         self.sentiment = recognized_str
         print("SERVER: user feedback is {}".format(self.sentiment))
-
-    # def process_sentiment(self):
-    #     sentiment_score = self.senti_analysist.predict(self.sentiment)
-    #     print(sentiment_score[0][0])
-
-    #     if 0 < sentiment_score[0][0] <= 0.15:
-    #         preview_sentiment = 'bad'
-    #     elif 0.15 < sentiment_score[0][0] <= 0.40:
-    #         preview_sentiment = 'slightly bad'
-    #     elif 0.40 < sentiment_score[0][0] <= 0.60:
-    #         preview_sentiment = 'average'
-    #     elif 0.60 < sentiment_score[0][0] <= 0.80:
-    #         preview_sentiment = 'pretty good'
-    #     elif 0.80 < sentiment_score[0][0] <= 1:
-    #         preview_sentiment = 'almost perfect'
-
-    #     rating = round(sentiment_score[0][0] * 10)
-    #     preview_sentiment = preview_sentiment + " with a rating of {} out of 10".format(
-    #         rating)
-
-    #     print("SERVER: sentiment analysis is {} on {}".format(
-    #         preview_sentiment, sentiment_score[0]))
-
-    #     self.outsocket.send_string(preview_sentiment)
 
     def get_mic_input(self):
         recognized_str = 'None'
@@ -196,35 +164,6 @@ class LanguageServer:
     def plese_propose_corner(self):
         #self.say_word('Please propose a corner!')
         self.playsound(self.voice_path + '/' + 'please_corner.mp3')
-
-    def ask_for_start_grasping(self):
-        while True:
-            self.say_word("Would you for me to start grasping?")
-            rospy.loginfo("Baxter: Can I Start grasping?")
-            audio = self.get_audio()
-            recognized_str = str(self.recognize(audio))
-            rospy.loginfo('String detected: {}'.format(recognized_str))
-            if 'yes' in recognized_str:
-                self.say_word("Starting grasping")
-                rospy.loginfo("Baxter: Starting grasping")
-                break
-
-            if recognized_str in self.available_answers:
-                if recognized_str == 'no':
-                    self.say_word("Standing still")
-                    time.sleep(5)
-                elif recognized_str == 'close' or recognized_str == 'open':
-                    self.say_word("Did I ask anything about the gripper?")
-                else:
-                    self.say_word("Starting grasping")
-                    rospy.loginfo("Baxter: Starting grasping")
-                    break
-            else:
-                #self.say_word("Did not understand your answer")
-                self.playsound(self.voice_path + '/' +
-                               'did_not_understand_answer.mp3')
-                self.list_available_answers()
-        return True, recognized_str
 
     def ask_for_close_gripper(self):
         while True:
