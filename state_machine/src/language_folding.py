@@ -27,7 +27,7 @@ class Start(smach.State):
     def __init__(self,
                  outcomes=['sucess'],
                  input_keys=['foo_counter_in'],
-                 output_keys=['foo_counter_out']):
+                 output_keys=['foo_counter_out']) -> None:
         """Initialization node, just defaults to a sub state folding machine.
 
         Args:
@@ -56,7 +56,7 @@ class IdentifyCorner(smach.State):
                  lang_server: object,
                  outcomes=['sucess'],
                  input_keys=['baxter'],
-                 output_keys=['foo_counter_out']):
+                 output_keys=['foo_counter_out']) -> None:
         """Node on the state machine to identify a corner
 
         Args:
@@ -93,7 +93,8 @@ class IdentifyCorner(smach.State):
 # define state Bar
 class GraspCorner(smach.State):
 
-    def __init__(self, baxter: object, corner_id: int, lang_server: object):
+    def __init__(self, baxter: object, corner_id: int,
+                 lang_server: object) -> None:
         """Stretch node, is the last node of the sub state machine sequence
 
         Args:
@@ -134,7 +135,7 @@ class GraspCorner(smach.State):
 # define state Bar
 class Stretch(smach.State):
 
-    def __init__(self, baxter: object, lang_server: object):
+    def __init__(self, baxter: object, lang_server: object) -> None:
         """Stretch node, is the last node of the sub state machine sequence
 
         Args:
@@ -163,7 +164,7 @@ class Fold(smach.State):
 
     def __init__(self, counter: int, baxter: object, edge: float,
                  final_corners: PointStamped, closest_corners: PointStamped,
-                 corner_id: int, lang_server: object):
+                 corner_id: int, lang_server: object) -> None:
         """Creates the Fold node which is connected to a Goal node. Performs,
         the folding of the cloth.
         Args:
@@ -209,7 +210,8 @@ class Fold(smach.State):
 
 class Goal(smach.State):
 
-    def __init__(self, baxter: object, lang_server: object, final_flag: bool):
+    def __init__(self, baxter: object, lang_server: object,
+                 final_flag: bool) -> None:
         """Goal node, is the last node of the sub state machine sequence
 
         Args:
@@ -252,7 +254,7 @@ def sub_state_machine_fold_corner(counter: int, final_flag: bool,
                                   baxter: object, edge: float,
                                   final_corners: PointStamped,
                                   closest_corners: PointStamped,
-                                  corner_id: int, lang_server: object):
+                                  corner_id: int, lang_server: object) -> None:
     """Creates a sub state machine for each of the foldings, since it is a 
     repeated task depending on the number of corners.
     Args:
