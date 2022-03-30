@@ -5,8 +5,4 @@ Closing the gripper. - closing_gripper
 Do you want to propose a corner for folding? - do_want_propose_corner
 Please propose a corner!. - please_corner
 A warm thank you from the KTH Hackathon 2022 Team for participating in the folding task with Baxter. - thanks 
-
-
-
-
 Available corner options are: bottom left or bottom right or top left or top right. - available_corners
