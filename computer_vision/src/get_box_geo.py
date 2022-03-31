@@ -81,7 +81,7 @@ class box_geometry:
         # return Point(new_pos[0], new_pos[1], new_pos[2])
         return new_pos
 
-    def conver_to_point(self, pos: np.array) -> Point:
+    def convert_to_point(self, pos: np.array) -> Point:
         return Point(pos[0], pos[1], pos[2])
 
     def callback(self, data: PointCloud2) -> None:
@@ -156,13 +156,13 @@ class box_geometry:
             stamp = data.header.stamp
 
             cor0_world = PointStamped(world_frame,
-                                      self.conver_to_point(cor0_world))
+                                      self.convert_to_point(cor0_world))
             cor1_world = PointStamped(world_frame,
-                                      self.conver_to_point(cor1_world))
+                                      self.convert_to_point(cor1_world))
             cor2_world = PointStamped(world_frame,
-                                      self.conver_to_point(cor2_world))
+                                      self.convert_to_point(cor2_world))
             cor3_world = PointStamped(world_frame,
-                                      self.conver_to_point(cor3_world))
+                                      self.convert_to_point(cor3_world))
 
             self.geometry_pub.publish(bbox)
             # self.pub_corner0.publish(PointStamped(data.header, cor0))
