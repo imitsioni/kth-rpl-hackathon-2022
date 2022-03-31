@@ -85,7 +85,7 @@ def cluster(pcd: o3d.geometry.PointCloud,
     Cluster PointCloud using the DBSCAN algorithm and Visualization
     :param pcd: input point cloud
     :param eps: density parameter that is used to find neighbouring points.
-    :param min_points: Minimum number of points to form a cluster.
+    :param min_points: minimum number of points to form a cluster.
     :param view: Add visualization
     :return: np.array
     '''
