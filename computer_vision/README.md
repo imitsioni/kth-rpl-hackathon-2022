@@ -16,7 +16,11 @@ chmod +x src/get_box_geo.py
 ./get_box_geo.py
 ```
 
-## Purpose of the script
+## Definition of the camera frame
+Check launch of file `tf_camera_world.launch` to see where the camera is defined
+this needs to be hardcoded to where the camera actual is on Baxter.
+
+### Purpose of the script of the `get_box_geo.py`
 The script creates 5 topics which are essential for the main state machine to operate, these topics are:
 - <i>"bbox/geometry"</i>: publishes messages of the type <b>OrientedBoundingBox</b> from <b>moveit_msgs.msg</b> which correspondes to the box to be folded
 - 4 topics corresponding to the corners of the cloth, namely: <i>"bbox/corner0"</i>, <i>"bbox/corner1"</i>, <i>"bbox/corner2"</i>, <i>"bbox/corner3"</i> all of the type <b>PointStamped</b> from <b>geometry_msgs.msg</b>
