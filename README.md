@@ -40,9 +40,10 @@ There are three distinct modules <b>computer vision</b>, <b>state_machine</b>, <
 
 ### Run the state machine
 
-1. After following the requirements section closely, make sure the topics are read by using 
+1. After following the requirements section closely, make sure the 5 topics are 
+published correctly 
 ```
-rostopic list
+rostopic echo {name of the topic}
 ```
 
 2. Alter the `mic_config.json` under <b>state_machine</b> by changing the `Audio_IP` and `audio_port`
