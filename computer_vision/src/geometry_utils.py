@@ -30,9 +30,18 @@ def custom_draw_geometry_with_key_callback(pcd):
 
 
 def read_pointcloud(path: str, view: bool = False) -> o3d.geometry.PointCloud:
+    """_summary_
+
+    Args:
+        path (str): path to the file
+        view (bool, optional): _description_. Defaults to False.
+
+    Returns:
+        o3d.geometry.PointCloud: _description_
+    """
     '''
      Read point cloud from .pcd or .ply file
-    :param path: path to the file
+    :param path: 
     :param view: add visualization
     :return: o3d.geometry.PointCloud
     '''
@@ -65,7 +74,7 @@ def downsample(pcd: o3d.geometry.PointCloud,
                size: float = 0.01,
                view: bool = False) -> o3d.geometry.PointCloud:
     '''
-    downsample point cloud
+    Downsampling the point cloud
     :param pcd: input point cloud
     :param size: voxel size used to downsample the point cloud
     :param view: Add visualization
