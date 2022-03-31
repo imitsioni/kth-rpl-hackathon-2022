@@ -31,9 +31,9 @@ def custom_draw_geometry_with_key_callback(pcd):
 
 def read_pointcloud(path: str, view: bool = False) -> o3d.geometry.PointCloud:
     '''
-    # read point cloud from .pcd or .ply file
+     Read point cloud from .pcd or .ply file
     :param path: path to the file
-    :param view: Add visualization
+    :param view: add visualization
     :return: o3d.geometry.PointCloud
     '''
     pcd = o3d.io.read_point_cloud(path)
@@ -84,7 +84,7 @@ def cluster(pcd: o3d.geometry.PointCloud,
     '''
     Cluster PointCloud using the DBSCAN algorithm and Visualization
     :param pcd: input point cloud
-    :param eps: Density parameter that is used to find neighbouring points.
+    :param eps: density parameter that is used to find neighbouring points.
     :param min_points: Minimum number of points to form a cluster.
     :param view: Add visualization
     :return: np.array
