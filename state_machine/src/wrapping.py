@@ -3,33 +3,21 @@
 import copy
 
 from sensor_msgs.msg import CameraInfo, Image
-# from std_msgs.msg import Int32
 from cv_bridge import CvBridge, CvBridgeError
 import numpy as np
 import moveit_commander
 import geometry_msgs.msg
-# import message_filters
-# import cv2
 import rospy
 import tf2_ros
-# import tf2_geometry_msgs
 from geometry_msgs.msg import WrenchStamped, Pose, PoseStamped, Vector3, Quaternion
-# from sensor_msgs.msg import JointState
 import baxter_interface
 from baxter_interface import CHECK_VERSION
 import time
-# from copy import deepcopy
 import copy as copy_module
-# import math
 from tf.transformations import quaternion_matrix, quaternion_multiply
 
-# import os, sys
-# from datetime import datetime
 import pickle
-# import struct
-# import pypcd
-# from sensor_msgs.msg import PointCloud2
-# from sensor_msgs.msg import PointCloud
+
 from datetime import datetime
 
 from baxter_core_msgs.msg import EndpointState
@@ -40,10 +28,6 @@ from moveit_msgs.srv import GetPositionIK, GetPositionIKRequest, GetPositionIKRe
 
 from shape_msgs.msg import SolidPrimitive
 from math import sqrt, sin, cos, asin
-
-# import Pyro4
-# import Pyro4.util
-# import zmq
 
 from utils import get_pose_stamped_str, copy_pose_stamped, plan_cartesian_group, plan_group
 

@@ -6,9 +6,7 @@ from geometry_msgs.msg import Point, PointStamped
 import ctypes
 import struct
 import copy
-# import tf
 import numpy as np
-# from tf.transformations import quaternion_matrix
 
 
 class box_geometry:
@@ -61,7 +59,7 @@ class box_geometry:
         # self.listener = tf.TransformListener()
         self.rate.sleep()
 
-    def transform_to_world(self, pos, stamp=0):
+    def transform_to_world(self, pos: np.array, stamp=0):
         """
         # find the transform between 
         self.listener.waitForTransform('/world','/camera_depth_optical_frame', stamp, rospy.Duration(1) )

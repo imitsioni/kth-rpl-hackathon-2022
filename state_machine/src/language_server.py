@@ -3,9 +3,6 @@ import time
 import json
 import numpy as np
 import speech_recognition as sr
-#import playsound
-# from urllib.request import urlopen
-# from urllib2 import urlopen
 from future.moves.urllib.request import urlopen, Request
 import pyttsx3
 import rospy
