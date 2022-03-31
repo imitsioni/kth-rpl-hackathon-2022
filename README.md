@@ -14,7 +14,7 @@ To attempt this task we organized our approach as follows:
 
 ![alt text for screen readers](hackathon.png "Hackathon Framework")
 
-We decided to reformulate the task as both a human-robot interaction task and a conversational robot. An actor cooperates directly with baxter to achieve the final goal of the task. Notice that all folding parts are made by the robot. An example of a full interaction from start to finish goes as follows:
+We decided to reformulate the task as both a human-robot interaction task and a conversational robot. An actor cooperates directly with Baxter to achieve the final goal of the task. Notice that all folding parts are made by the robot. An example of a full interaction from start to finish goes as follows:
 1. Baxter asks the human to propose a corner for folding.
 2. The human simply picks one of the corners and makes it visible to a camera.
 3. Baxter asks if he can grasp the corner and proceeds to fold. 
