@@ -40,7 +40,7 @@ There are three distinct modules <b>computer vision</b>, <b>state_machine</b>, <
 
 ### Run the state machine
 
-1. After following the requirements section closely, make sure the ropics are read by using 
+1. After following the requirements section closely, make sure the topics are read by using 
 ```
 rostopic list
 ```
