@@ -223,7 +223,7 @@ def get_plane_distance(point: np.array, plane: np.array) -> float:
 def get_surface_size(
         selected_bbox: o3d.geometry.OrientedBoundingBox) -> [float, float]:
     """
-    find the size of the bbox
+    find the size of the bounding box (bbox)
     :param selected_bbox: input bbox
     :return: float, float
     """
