@@ -1,7 +1,7 @@
 # kth-rpl-hackathon-2022
 Repository hosting the code for the 2022 Robotics, Perception and Learning hackathon
 
-The theme for the hackathon this year was to perform a Furoshiki with Baxter!
+The theme for this year's hackathon was inspired by a Japanese technique of wrapping objects with a cloth (furoshiki) and it was performed by Baxter!
 ### Furoshiki - Japanese Gift Wrapping
 
 <div align="center">
