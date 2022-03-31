@@ -33,7 +33,7 @@ def read_pointcloud(path: str, view: bool = False) -> o3d.geometry.PointCloud:
     '''
     # read point cloud from .pcd or .ply file
     :param path: path to the file
-    :param view: Add visualization
+    :param view: add visualization
     :return: o3d.geometry.PointCloud
 
     # can use np.asarray(pcd.points) to get points
