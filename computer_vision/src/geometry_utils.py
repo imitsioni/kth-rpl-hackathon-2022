@@ -31,7 +31,7 @@ def custom_draw_geometry_with_key_callback(pcd):
 
 def read_pointcloud(path: str, view: bool = False) -> o3d.geometry.PointCloud:
     '''
-    # read point cloud from .pcd or .ply file
+     Read point cloud from .pcd or .ply file
     :param path: path to the file
     :param view: add visualization
     :return: o3d.geometry.PointCloud
