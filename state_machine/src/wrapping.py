@@ -592,7 +592,7 @@ class BaxterWrapping:
         print(self.interrupt_movement_right)
         # Keep moving while force threshold not surpassed
         pull = True
-        while pull:  # TODO: define better safe stopping condition
+        while pull:
             self.move_along_line(direction, distance)
             print(self.opto_forces_right)
             print(self.interrupt_movement_right)
@@ -603,7 +603,6 @@ class BaxterWrapping:
             else:
                 pull = not self.interrupt_movement_left and count < 15
 
-        # TODO: code success
         success = True
         return success
 
@@ -737,7 +736,7 @@ class BaxterWrapping:
 
         return directions, distances
 
-    def arm_selection(self, grasp_y_position):  # TODO: to be tested
+    def arm_selection(self, grasp_y_position):
         """ Functions that decide which arm to use for the ongoing execution
             and set the class variable self.arm
 
@@ -745,7 +744,7 @@ class BaxterWrapping:
             grasp_y_position (float): y coordinates grasping point
 
         """
-        if grasp_y_position > 0.01:  # TODO: check this is an ok value
+        if grasp_y_position > 0.01:
             key = 'left'
         else:
             key = 'right'
@@ -828,23 +827,6 @@ class BaxterWrapping:
                                                         4.0,
                                                         avoid_collisions=True)
 
-        # OPTIONAL TODO: Check timing of trajectory
-        # n_timed_traj = len(plan.joint_trajectory.points)
-        #
-        # desired_duration = 10.0
-        # dt = int((desired_duration / n_timed_traj) * 1e9)  # nsecs
-        #
-        # plan.joint_trajectory.points[0].time_from_start.secs = 0
-        # plan.joint_trajectory.points[0].time_from_start.nsecs = 0
-        # print(str(n_timed_traj) + "timed trajectory points!")
-        # print(str(dt * 1e-9) + " s per point")
-        # for i in range(1, n_timed_traj):
-        #     plan.joint_trajectory.points[i].time_from_start.nsecs = plan.joint_trajectory.points[i-1].time_from_start.nsecs + dt
-        #
-        #     if plan.joint_trajectory.points[i].time_from_start.nsecs >= int(1e9):
-        #         plan.joint_trajectory.points[i].time_from_start.secs += 1
-        #         plan.joint_trajectory.points[i].time_from_start.nsecs -= 1e9
-        # print(plan)
         group.execute(plan, wait=True)
 
     def move_to_point(self, point):

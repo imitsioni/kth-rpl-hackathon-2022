@@ -260,12 +260,8 @@ def get_surface_size_from_pcd(
     top_surface_corner = np.array([max_x, max_y, min_x, min_y])
     center = np.mean(np.asarray(pcd.points), axis=0)
 
-    length1 = max(
-        np.linalg.norm(min_x - max_y), np.linalg.norm(min_y - max_x)
-    )  #(np.linalg.norm(min_x - max_y) + np.linalg.norm(min_y - max_x)) / 2.
-    length2 = max(
-        np.linalg.norm(min_x - min_y), np.linalg.norm(max_y - max_x)
-    )  #(np.linalg.norm(min_x - min_y) + np.linalg.norm(max_y - max_x)) / 2.
+    length1 = max(np.linalg.norm(min_x - max_y), np.linalg.norm(min_y - max_x))
+    length2 = max(np.linalg.norm(min_x - min_y), np.linalg.norm(max_y - max_x))
     return length1, length2, top_surface_corner, center
 
 

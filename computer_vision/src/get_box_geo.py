@@ -19,7 +19,6 @@ class box_geometry:
             0.5)  # publish message at 0.5 Hz, still not good enough
         # self.sub = rospy.Subscriber("/camera/depth/color/points", PointCloud2, self.callback, queue_size=1)
 
-        # TODO
         self.sub = rospy.Subscriber("/camera_kinect/depth/points",
                                     PointCloud2,
                                     self.callback,
@@ -105,11 +104,10 @@ class box_geometry:
             self.buffer_surface)
 
         # only publish the topic when the buffer saves 20 timestamps
-        if len(self.buffer_box_geometry) == 20:  # TODO: set the seq_length
+        if len(self.buffer_box_geometry) == 20:
             buffer_box_geometry_numpy = np.array(self.buffer_box_geometry)
             buffer_center_numpy = np.array(self.buffer_center)
             buffer_surface_numpy = np.array(self.buffer_surface)
-            # TODO: need to double check the median results
             geometry = np.median(buffer_box_geometry_numpy, axis=0)
             center = np.median(buffer_center_numpy, axis=0)
             top_surface_corners = np.median(buffer_surface_numpy, axis=0)
@@ -134,8 +132,7 @@ class box_geometry:
             # y_increasing_ind = np.argsort(cor_world, axis=0) # increasing order
             y_increasing = np.argsort(cor_world[:, 1])
             cor_world = cor_world[y_increasing]
-            cor_world[:,
-                      2] = bbox.pose.position.z  # TODO: replacing the z axis as the z axis of the box center(in world frame)
+            cor_world[:, 2] = bbox.pose.position.z
             threshold = 0.01
             if cor_world[1, 1] - cor_world[0, 1] > threshold:
                 cor0_world = cor_world[0]

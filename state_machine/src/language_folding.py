@@ -81,8 +81,6 @@ class IdentifyCorner(smach.State):
     def execute(self, userdata):
         #rospy.loginfo('Executing state Identify Corner')
 
-        #TODO: ask which corner to grasp
-
         # Initialize position
         self.baxter.initialize()
 
