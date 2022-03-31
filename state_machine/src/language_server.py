@@ -74,7 +74,7 @@ class LanguageServer:
             recognizer (object), audio_socket (str): Recognizer, API from 
             google, and an address to an audio socket.
         """
-        audio_socket = 'http://' + self.config["Audio_IP"] + ':' + self.config[
+        audio_socket = 'http://' + self.config["audio_IP"] + ':' + self.config[
             "audio_port"] + '/audio.wav'
         recognizer = sr.Recognizer()
 

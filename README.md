@@ -36,7 +36,7 @@ There are three distinct modules <b>computer vision</b>, <b>state_machine</b>, <
 
 2. Setup all of Baxter sensors by running the explained commands under `steps` on the `state_machine` folder.
 
-3. Follow the instructions under the `computer vision` folder to install the necessary packages and to publish the .
+3. Follow the instructions under the `computer vision` folder to install the necessary packages and to publish the 5 topics related to the box and cloth corners positions.
 
 ### Run the state machine
 
