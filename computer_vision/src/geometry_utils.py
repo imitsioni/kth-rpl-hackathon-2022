@@ -206,7 +206,7 @@ def find_plane(pcd: o3d.geometry.PointCloud,
 def get_plane_distance(point: np.array, plane: np.array) -> float:
     '''
     # https://www.geeksforgeeks.org/distance-between-a-point-and-a-plane-in-3-d/
-    Function to find distance from the center of bbox to the plane
+    Function to find distance from the center of the bounding box (bbox) to the plane
     :param point: input bbox
     :param plane: coefficient of a plane
     :return: float
