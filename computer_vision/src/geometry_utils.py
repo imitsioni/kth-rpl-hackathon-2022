@@ -48,7 +48,7 @@ def init_pointcloud(points: np.array,
                     colors: np.array = None,
                     view: bool = False) -> o3d.geometry.PointCloud:
     """
-    init pointcloud from np.array
+    Initialize pointcloud from np.array
     :param points: input point cloud [N,3]
     :param colors: colors of the point cloud [N,3]
     :param view: Add visualization
