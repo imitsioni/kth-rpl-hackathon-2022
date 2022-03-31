@@ -3,7 +3,7 @@ Repository hosting the code for the 2022 Robotics, Perception and Learning hacka
 
 ## Requirements
 - Open3D: version used was 0.9.0, it supports python 2.7, 3.5, 3.6, 3.7
-- A running roscore (to install ROS please check the other folder where the state_machine ROS package resisdes)
+- ROS  (to install ROS please check the other folder where the state_machine ROS package resisdes)
 
 ## Installation
 1. Open a terminal and install open3d, matplotlib, pyyaml and rospkg
