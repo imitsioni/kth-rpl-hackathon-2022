@@ -30,21 +30,15 @@ def custom_draw_geometry_with_key_callback(pcd):
 
 
 def read_pointcloud(path: str, view: bool = False) -> o3d.geometry.PointCloud:
-    """_summary_
+    """Read point cloud from .pcd or .ply file
 
     Args:
         path (str): path to the file
-        view (bool, optional): _description_. Defaults to False.
+        view (bool, optional): add visualization. Defaults to False.
 
     Returns:
-        o3d.geometry.PointCloud: _description_
+        o3d.geometry.PointCloud: returns a point cloud
     """
-    '''
-     Read point cloud from .pcd or .ply file
-    :param path: 
-    :param view: add visualization
-    :return: o3d.geometry.PointCloud
-    '''
     pcd = o3d.io.read_point_cloud(path)
     if view:
         custom_draw_geometry_with_key_callback([pcd])
@@ -54,13 +48,17 @@ def read_pointcloud(path: str, view: bool = False) -> o3d.geometry.PointCloud:
 def init_pointcloud(points: np.array,
                     colors: np.array = None,
                     view: bool = False) -> o3d.geometry.PointCloud:
-    """
-    Initialize pointcloud from np.array
-    :param points: input point cloud [N,3]
-    :param colors: colors of the point cloud [N,3]
-    :param view: Add visualization
-    :return: o3d.geometry.PointCloud
-    """
+    """Initialize pointcloud from np.array
+
+    Args:
+        points (np.array): input point cloud [N,3]
+        colors (np.array, optional): colors of the point cloud [N,3]. defaults to None.
+        view (bool, optional): _description_. defaults to False.
+
+    Returns:
+        o3d.geometry.PointCloud: a point cloud
+    """ """"""
+
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(points)
     if colors is not None:
@@ -73,13 +71,17 @@ def init_pointcloud(points: np.array,
 def downsample(pcd: o3d.geometry.PointCloud,
                size: float = 0.01,
                view: bool = False) -> o3d.geometry.PointCloud:
-    '''
-    Downsampling the point cloud
-    :param pcd: input point cloud
-    :param size: voxel size used to downsample the point cloud
-    :param view: Add visualization
-    :return:  o3d.geometry.PointCloud
-    '''
+    """_summary_
+
+    Args:
+        pcd (o3d.geometry.PointCloud): input point cloud
+        size (float, optional): voxel size used to downsample the point cloud. 
+        defaults to 0.01.
+        view (bool, optional): Add visualization. defaults to False.
+
+    Returns:
+        o3d.geometry.PointCloud: point cloud downsampled
+    """
     downpcd = pcd.voxel_down_sample(voxel_size=size)
     if view:
         custom_draw_geometry_with_key_callback([downpcd])
@@ -90,15 +92,19 @@ def cluster(pcd: o3d.geometry.PointCloud,
             eps: float = 0.02,
             min_points: int = 10,
             view: bool = False) -> np.array:
-    '''
-    Cluster PointCloud using the DBSCAN algorithm and Visualization
-    :param pcd: input point cloud
-    :param eps: density parameter that is used to find neighbouring points.
-    :param min_points: minimum number of points to form a cluster.
-    :param view: Add visualization
-    :return: np.array
-    '''
+    """Cluster PointCloud using the DBSCAN algorithm and Visualization
 
+    Args:
+        pcd (o3d.geometry.PointCloud): input point cloud
+        eps (float, optional): density parameter that is used to find 
+        neighbouring points. defaults to 0.02.
+        min_points (int, optional): minimum number of points to form a cluster.
+        defaults to 10.
+        view (bool, optional): add visualization. defaults to False.
+
+    Returns:
+        np.array: cluster array
+    """
     labels = np.array(pcd.cluster_dbscan(eps, min_points))
     if view:
         max_label = labels.max()
@@ -115,12 +121,16 @@ def cluster(pcd: o3d.geometry.PointCloud,
 def get_largest_cluster(pcd: o3d.geometry.PointCloud,
                         labels: np.array,
                         view: bool = False) -> o3d.geometry.PointCloud:
-    """
-    select the cluster with largest number of points --> indicate the table and bbox area
-    :param pcd: input point cloud
-    :param labels: labels obtained from cluster
-    :param view: Add visualization
-    :return: o3d.geometry.PointCloud
+    """select the cluster with largest number of points --> indicate the table 
+    and bbox area
+
+    Args:
+        pcd (o3d.geometry.PointCloud): input point cloud
+        labels (np.array): labels obtained from cluster
+        view (bool, optional): add visualization. defaults to False.
+
+    Returns:
+        o3d.geometry.PointCloud: largest point cloud
     """
     count = [(labels == i).sum() for i in np.unique(labels)]
     max_labels = np.unique(labels)[np.argmax(count)]
@@ -138,17 +148,25 @@ def find_plane(pcd: o3d.geometry.PointCloud,
                num_iterations: int = 1000,
                d_threshold: float = 0.01,
                view: bool = False) -> [dict, dict]:
-    """
-    find plane given the point cloud
-    :param pcd: input point cloud
-    :param max_plane_idx: want to find maximun number of plane
-    :param distance_threshold: Max distance a point can be from the plane model, and still be considered an inlier.
-    :param ransac_n: Number of initial points to be considered inliers in each iteration.
-    :param num_iterations: Number of iterations.
-    :param d_threshold: Density parameter that is used to find neighbouring points.
-    :param view: Add visualization
-    :return: pointcloud in two planes: dict{o3d.geometry.PointCloud, o3d.geometry.PointCloud
-             coefficient of two planes: dict{ np.array, np.array} )
+    """find plane given the point cloud
+
+    Args:
+        pcd (o3d.geometry.PointCloud): input point cloud
+        max_plane_idx (int, optional): want to find maximun number of plane. 
+        defaults to 2.
+        distance_threshold (float, optional): Max distance a point can be from 
+        the plane model, and still be considered an inlier. defaults to 0.01.
+        ransac_n (int, optional): Number of initial points to be considered 
+        inliers in each iteration. defaults to 3.
+        num_iterations (int, optional): number of iterations. defaults to 1000.
+        d_threshold (float, optional): Density parameter that is used to find 
+        neighbouring points. defaults to 0.01.
+        view (bool, optional): add visualization. defaults to False.
+
+    Returns:
+        [dict, dict]: pointcloud in two planes: dict{o3d.geometry.PointCloud, 
+        o3d.geometry.PointCloud coefficient of two planes: 
+        dict{ np.array, np.array}
     """
     segment_models = {}
     segments = {}
