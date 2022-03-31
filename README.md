@@ -23,7 +23,7 @@ We decided to reformulate the task as both a human-robot interaction task and a 
 
 There are three distinct modules <b>computer vision</b>, <b>state_machine</b>, <b>language</b>:
 - <b>computer vision</b>: Responsible for publishing to <b>ROS</b> the topics related to the orientation of the box, and the corners of the cloth, for more information please check the `computer_vision` folder.
-- <b>state_machine</b>: Responsible for the macro level planning, it is represented by a state machie created in <b>ROS</b>, connects both the <b>control</b> part of Baxter by reading the topics published from the computer vision module and the language module. More information on how to install baxter is given under the `state_machine` folder. 
+- <b>state_machine</b>: Responsible for the macro level planning, it is represented by a state machine created in <b>ROS</b>, connects both the <b>control</b> part of Baxter by reading the topics published from the computer vision module and the language module. More information on how to install the Baxter-related packages is given under the `state_machine` folder. 
 - <b>language</b>: The language module works outside of <b>ROS</b> for convinience of connection, and connects to a google API which converts speech-to-text which is used within the state machine. This module resides under the `state_machine` folder.
 
 
