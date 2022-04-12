@@ -1,0 +1,32 @@
+<launch>
+  
+  <!-- Start joint action server -->
+  <node pkg="baxter_interface" name="joint_trajectory_action_server.py" type="joint_trajectory_action_server.py" output="screen"/>
+
+  <param name="move_group/trajectory_execution/allowed_execution_duration_scaling" value="4.0" />
+  <param name="move_group/trajectory_execution/execution_duration_monitoring" value="false" />
+
+  <!-- Start baxter -->
+  <include file="$(find baxter_moveit_config)/launch/baxter_grippers.launch">
+    <arg name="rviz_config" value="$(find kth-rpl-hackathon-2022)/launch/wrapping.rviz" />
+  </include>
+
+
+<include file="$(find realsense2_camera)/launch/rs_camera.launch">
+      <arg name="filters" value="pointcloud,spatial,temporal" />
+      <arg name="align_depth" value="true" />
+</include>
+
+  <!-- Start marker detection -->
+  <include file="$(find apriltag_ros)/launch/continuous_detection_hackathon.launch"/>
+
+
+  <!-- Set static tramnsformation-->
+  
+    <node pkg="tf"
+        type="static_transform_publisher"
+        name="world_camera_tf"
+        args="0.139 0.088 0.537 -0.602 0.690 -0.274 0.294 world camera_link 10" />
+
+
+</launch>

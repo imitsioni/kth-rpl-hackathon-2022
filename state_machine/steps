@@ -1,0 +1,164 @@
+#activate workspace
+rosnode kill -a
+killall -9 roscore
+killall -9 rosmaster
+
+cd catkin_ws
+./baxter.sh    !!!!needs to be done for every terminal to talk to baxter!!!
+
+# enable baxter
+rosrun baxter_tools enable_robot.py -e
+
+#launch file with baxter stuff
+roslaunch kth-rpl-hackathon-2022 wrapping.launch
+
+#start the wrapping
+rosrun kth-rpl-hackathon-2022 wrapping.py
+
+#start naming server
+python -m Pyro4.naming
+
+#start visual vosight
+
+
+
+
+
+################
+Environment: 
+-) black tablecloth 
+-) light on the stand at height 125 cm
+
+
+
+
+
+
+
+
+
+##################################### STEP BY STEP  COMMANDS 
+#init movit thingy
+rosrun baxter_interface joint_trajectory_action_server.py
+
+#in new terminal
+roslaunch baxter_moveit_config baxter_grippers.launch
+
+#camera
+roslaunch openni2_launch openni2.launch 
+
+#tranformation world camera
+rosrun  tf static_transform_publisher 0.184 0.041 0.240 -0.021 0.408 0.024 0.912  world camera_link 10
+
+
+#start the thing
+rosrun baxter_folding_teleop teleop_folding.py 
+
+##################################### END STEP BY STEP  COMMANDS 
+
+
+
+
+
+##----------------------------------------------------____##
+
+hand eye calibration (quick and dirty way)
+
+1-place April tag on table
+2- move Baxters end effectero to midle of tag
+3- record transform from baxter to tag with "rosrun tf tf_echo world left_gripper" for example
+- Translation: [0.716, 0.023, -0.216]
+- Rotation: in Quaternion [-0.148, 0.988, -0.032, -0.004]
+            in RPY (radian) [-3.080, -0.016, -2.844]
+            in RPY (degree) [-176.453, -0.945, -162.966]
+
+## Correct Tag size ###
+- Translation: [0.73, 0.024, -0.22]
+
+
+
+4 - publish the translation and no rotation to tag_0_pos
+
+rosrun tf static_transform_publisher 0.716 0.023 -0.216 0 0 0 world tag_0_pos 10
+
+5 - check if position matches - then remove EE
+
+6- start camera
+
+ roslaunch openni2_launch openni2.launch 
+
+7 - run tag detector 
+roslaunch apriltag_ros continuous_detection.launch
+
+
+
+8 - get transform between tag and camera
+
+ rosrun tf  tf_echo tag_0 camera_link
+
+- Translation: [-0.066, -0.685, 0.882]
+- Rotation: in Quaternion [0.917, -0.067, -0.010, -0.393]
+            in RPY (radian) [-2.336, 0.071, -0.115]
+            in RPY (degree) [-133.828, 4.060, -6.586]
+
+## Correct Tag size ###
+- Translation: [-0.064, -0.591, 0.757]
+- Rotation: in Quaternion [0.913, -0.062, -0.014, -0.402]
+            in RPY (radian) [-2.315, 0.075, -0.102]
+            in RPY (degree) [-132.652, 4.299, -5.852]
+
+
+
+
+9 - stop tag detactor and publish found transform
+rosrun tf static_transform_publisher -0.066 -0.685 0.882 0.917 -0.067 -0.01 -0.393 tag_0 camera_link 10
+
+10 - now publish conection between tag_0_pos and tag_0 and fix rotation this assumes the tag rotationaly aligned with baxter and the text "Id:0" is closer to camera
+
+rosrun tf static_transform_publisher 0 0 0 -1.570796326 0 0 tag_0_pos tag_0 10
+########## ABOVE IS IN POS-FOLLOWED BY 3 ANGLES IN RADIANS
+
+
+
+10 - now get transform between world and camera:
+
+rosrun tf tf_echo world camera_link
+
+- Translation: [0.201, 0.070, 0.231]   ###### original!
+- Rotation: in Quaternion [0.028, 0.467, 0.017, 0.884]
+            in RPY (radian) [0.116, 0.969, 0.099]
+            in RPY (degree) [6.626, 55.507, 5.693]
+
+## Correct Tag size ###
+- Translation: [0.139, 0.088, 0.537]
+- Rotation: in Quaternion [-0.602, 0.690, -0.274, 0.294]
+            in RPY (radian) [-2.316, 0.076, -1.673]
+            in RPY (degree) [-132.694, 4.328, -95.873]
+
+
+
+##################### Simon says this works!
+- Translation: [0.031, 0.089, 0.666]
+- Rotation: in Quaternion [-0.601, 0.696, -0.271, 0.285]
+            in RPY (radian) [-2.336, 0.071, -1.686]
+            in RPY (degree) [-133.838, 4.072, -96.622]
+
+
+11 - edit launch file with transform or run:
+
+rosrun  tf static_transform_publisher 1.401 -0.043 0.666 0.696 0.601 -0.285 -0.271  world camera_link 10
+rosrun  tf static_transform_publisher 0.201 0.070 0.231 0.028 0.467 0.017 0.884  world camera_link 10
+
+rosrun  tf static_transform_publisher 0.650 -0.662 0.666 0.917 -0.067 -0.010 -0.393  world camera_link 10
+
+ Translation: [0.650, -0.662, 0.666]
+- Rotation: in Quaternion [0.917, -0.067, -0.010, -0.393]
+            in RPY (radian) [-2.336, 0.071, -0.116]
+            in RPY (degree) [-133.838, 4.072, -6.622]
+
+## FINAL EXTRINSICS!!!!!!!!!!!!!!!############################
+
+- Translation: [0.139, 0.088, 0.537]
+- Rotation: in Quaternion [-0.602, 0.690, -0.274, 0.294]
+            in RPY (radian) [-2.316, 0.076, -1.673]
+            in RPY (degree) [-132.694, 4.328, -95.873]

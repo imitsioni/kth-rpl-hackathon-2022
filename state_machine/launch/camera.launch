@@ -1,0 +1,16 @@
+<launch>
+  
+
+  <!-- Start the camera -->
+  <include file="$(find openni2_launch)/launch/openni2.launch"/>
+
+
+  <!-- Set static tramnsformation-->
+   <node pkg="tf"
+        type="static_transform_publisher"
+        name="world_camera_tf"
+        args="0.184 0.072 0.231 0.003 0.394 -0.006 0.919   world camera_link 10" />
+
+  
+
+</launch>
